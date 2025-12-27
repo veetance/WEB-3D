@@ -1,0 +1,114 @@
+/**
+ * VEETANCE Custom Color Picker Styles
+ */
+
+.color-picker-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+}
+
+.color-picker-popup {
+    position: absolute;
+    width: 200px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Glassmorphism */
+    backdrop-filter: blur(10px);
+    background: rgba(26, 26, 26, 0.9);
+}
+
+.cp-canvas-area {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    background: red;
+    /* Base color changed via JS */
+    border-radius: 2px;
+    cursor: crosshair;
+    overflow: hidden;
+}
+
+.cp-canvas-white {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
+}
+
+.cp-canvas-black {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.cp-cursor {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+.cp-hue-slider {
+    width: 100%;
+    height: 12px;
+    background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+    border-radius: 2px;
+    position: relative;
+    cursor: ew-resize;
+}
+
+.cp-hue-handle {
+    position: absolute;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: #fff;
+    border: 1px solid #000;
+    border-radius: 1px;
+    transform: translateX(-50%);
+}
+
+.cp-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cp-preview {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #333;
+    border-radius: 2px;
+}
+
+.cp-hex-input {
+    flex: 1;
+    background: #111;
+    border: 1px solid #333;
+    color: #ccc;
+    font-family: monospace;
+    font-size: 10px;
+    padding: 4px 6px;
+    border-radius: 2px;
+    outline: none;
+}
+
+.cp-hex-input:focus {
+    border-color: #00ffd2;
+}

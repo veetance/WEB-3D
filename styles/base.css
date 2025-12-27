@@ -1,0 +1,37 @@
+/**
+ * VEETANCE Base Styles
+ * Foundation layer - resets and body layout
+ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #0a0a0a;
+    height: 100vh;
+    display: flex;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #eee;
+    user-select: none;
+    overflow: hidden;
+}
+
+/* Typography */
+h1,
+h2,
+h3 {
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+label {
+    display: block;
+    font-size: 0.7rem;
+    margin-bottom: 8px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}

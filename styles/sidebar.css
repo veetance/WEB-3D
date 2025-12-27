@@ -1,0 +1,257 @@
+/**
+ * VEETANCE Sidebar Styles
+ * Collapsible side panel architecture
+ */
+
+#sidebar {
+    width: 280px;
+    min-width: 280px;
+    height: 100vh;
+    background: #111;
+    border-right: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease, min-width 0.3s ease;
+    /* Transition width for flex center */
+    position: relative;
+    z-index: 100;
+}
+
+#sidebar.collapsed {
+    width: 0;
+    min-width: 0;
+    margin-left: 0;
+    border: none;
+    overflow: visible;
+}
+
+
+/* Toggle Button - Minimalist */
+#toggleBtn {
+    background: transparent;
+    border: none;
+    color: #00ffd2;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+#toggleBtn .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background: #1a1a1a;
+    transition: all 0.2s;
+    position: relative;
+}
+
+/* The "Icon Version" Chevron - Pure CSS Line */
+#toggleBtn .icon::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-left: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    /* Points Left */
+    transition: none;
+    /* Instant state change */
+    margin-left: 2px;
+}
+
+#sidebar.collapsed .icon::after {
+    transform: rotate(225deg);
+    /* Points Right */
+    margin-left: -2px;
+}
+
+#sidebar .btn-text {
+    display: none;
+    /* Hidden when open */
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #00ffd2;
+}
+
+#toggleBtn:hover .icon {
+    border-color: #00ffd2;
+    background: #00ffd222;
+    box-shadow: 0 0 10px rgba(0, 255, 210, 0.2);
+}
+
+
+/* Collapsed Toggle - Float to Top Left */
+#sidebar.collapsed #toggleBtn {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    z-index: 1000;
+    gap: 12px;
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(10px);
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    min-width: 110px;
+    box-sizing: border-box;
+    justify-content: space-between;
+}
+
+#sidebar.collapsed #toggleBtn .icon {
+    border: none;
+    background: transparent;
+    padding: 0;
+    width: auto;
+    height: auto;
+}
+
+#sidebar.collapsed .btn-text {
+    display: inline;
+    font-size: 9px;
+    font-weight: 800;
+    color: #444;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+#sidebar.collapsed #toggleBtn:hover {
+    background: rgba(20, 20, 20, 0.6);
+}
+
+#sidebar.collapsed #toggleBtn:hover .btn-text {
+    color: #00ffd2;
+}
+
+/* Panel Header - Flex justified */
+.panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #222;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 64px;
+}
+
+.panel-header h1 {
+    font-size: 0.8rem;
+    color: #00ffd2;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* Handle Collapsed State */
+#sidebar.collapsed .panel-content,
+#sidebar.collapsed .import-zone {
+    display: none;
+}
+
+#sidebar.collapsed .panel-header h1 {
+    display: none;
+}
+
+#sidebar.collapsed .panel-header {
+    border: none;
+    padding: 0;
+}
+
+/* Panel Content */
+.panel-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    /* Fixed anchor for overlay components */
+    /* Area is container for children */
+}
+
+/* Scroll Manifold */
+.scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 20px;
+    scrollbar-width: none;
+    /* Hide native for Firefox */
+}
+
+/* Hide native scrollbar - Chrome/Safari/Brave */
+.scroll-area::-webkit-scrollbar {
+    display: none;
+}
+
+/* Custom Overlay Scrollbar - Truly Positioned Absolute */
+.custom-scrollbar {
+    position: absolute;
+    right: 2px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    z-index: 1000;
+}
+
+.custom-thumb {
+    width: 100%;
+    background: rgba(0, 255, 210, 0.4);
+    /* Potent neon base */
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    cursor: grab;
+    transition: background 0.2s, width 0.2s, opacity 0.3s;
+    opacity: 0;
+    /* Invisible by default */
+}
+
+.panel-content:hover .custom-thumb,
+.custom-thumb.active {
+    opacity: 1;
+    /* Materialize on interaction */
+}
+
+.custom-thumb.active,
+.custom-thumb:hover {
+    background: rgba(0, 255, 210, 0.9);
+    /* Hyper-glow focus */
+    width: 6px;
+    right: 0;
+}
+
+/* Fixed Base */
+.import-zone {
+    padding: 10px;
+    border-top: 1px solid #1a1a1a;
+    background: #111;
+}
+
+.import-zone .section {
+    padding: 0;
+    margin: 0;
+}
+
+/* Sections - Now holding the gutters */
+.section {
+    padding: 0 20px;
+    margin-bottom: 24px;
+}
+
+
+
+.section-title {
+    font-size: 0.6rem;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1a1a1a;
+}

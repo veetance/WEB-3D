@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEETANCE 3D Engine</title>
+
+    <!-- Fragmented Styles -->
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/sidebar.css">
+    <link rel="stylesheet" href="styles/controls.css">
+    <link rel="stylesheet" href="styles/viewport.css">
+    <link rel="stylesheet" href="styles/modal.css">
+    <link rel="stylesheet" href="styles/colorpicker.css">
+    <!-- <script src="js/core/optimizer.js?v=3" defer></script> -->
+</head>
+
+<body>
+    <!-- Collapsible Side Panel -->
+    <aside id="sidebar">
+        <div class="panel-header">
+            <h1>F.A.S.T. ENGINE</h1>
+            <button id="toggleBtn">
+                <span class="icon"></span>
+                <span class="btn-text"></span>
+            </button>
+        </div>
+
+        <div class="panel-content">
+            <div class="custom-scrollbar">
+                <div class="custom-thumb" id="side-thumb"></div>
+            </div>
+            <div class="scroll-area">
+                <!-- Transform Mode -->
+                <div class="section">
+                    <div class="section-title">Transform Mode</div>
+                    <div class="btn-group">
+                        <button class="mode-btn active" data-mode="orbit">Orbit</button>
+                        <button class="mode-btn" data-mode="translate">Move</button>
+                        <button class="mode-btn" data-mode="rotate">Rotate</button>
+                        <button class="mode-btn" data-mode="scale">Scale</button>
+                    </div>
+                </div>
+
+                <!-- View Controls -->
+                <div class="section">
+                    <div class="section-title">View</div>
+                    <div class="control-group">
+                        <!-- Zoom moved to Viewport -->
+                    </div>
+                    <div class="control-group switch-row">
+                        <label for="auto">Auto-Rotate</label>
+                        <div class="custom-switch">
+                            <input type="checkbox" id="auto">
+                            <span class="switch-slider"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appearance -->
+                <div class="section">
+                    <div class="section-title">Appearance</div>
+                    <div class="control-group">
+                        <label>Line Weight</label>
+                        <input type="range" id="thickness" min="0.5" max="5" step="0.5" value="1">
+                    </div>
+                    <div class="control-group color-row">
+                        <label for="color">Wireframe Color</label>
+                        <input type="color" id="color" value="#00ffd2">
+                    </div>
+                    <div class="control-group color-row">
+                        <label for="polyColor">Polygon Color</label>
+                        <input type="color" id="polyColor" value="#1a1a1a">
+                    </div>
+                    <div class="control-group">
+                        <label>View Mode</label>
+                        <div class="btn-group">
+                            <button class="mode-btn view-btn active" data-view="SHADED_WIRE"
+                                title="Shaded + Wire">▣</button>
+                            <button class="mode-btn view-btn" data-view="SOLID" title="Shaded">■</button>
+                            <button class="mode-btn view-btn" data-view="WIRE" title="Wireframe">⬚</button>
+                            <button class="mode-btn view-btn" data-view="POINTS" title="Point Cloud">⠂</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Topology Optimization -->
+                <div class="section">
+                    <div class="section-title">Topology Optimization</div>
+                    <div class="control-group">
+                        <label>Reduction Strength</label>
+                        <input type="range" id="reduceStrength" min="10" max="100" step="5" value="50">
+                    </div>
+                    <div class="transfer-row">
+                        <button id="reduceBtn" class="upload-btn">OPTIMIZE</button>
+                        <button id="resetGeomBtn" class="upload-btn secondary">RESET</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import (Fixed at bottom) -->
+        <div class="import-zone">
+            <div class="section">
+                <div class="section-title">ASSET I/O</div>
+                <div class="transfer-row">
+                    <label for="fileInput" class="upload-btn">UPLOAD <span class="subtext">(OBJ/GLB)</span></label>
+                    <button id="exportBtn" class="upload-btn secondary">EXPORT <span
+                            class="subtext">(.OBJ)</span></button>
+                </div>
+                <input type="file" id="fileInput" accept=".obj,.glb" hidden>
+                <a id="downloadAnchor" style="display:none"></a>
+            </div>
+        </div>
+        </div>
+    </aside>
+
+    <!-- Canvas Viewport -->
+    <main id="viewport">
+        <!-- Viewport Toggles (Top Left) -->
+        <div id="viewport-toggles">
+            <div class="toggle-row">
+                <span>GRID</span>
+                <div class="custom-switch">
+                    <input type="checkbox" id="show-grid" checked>
+                    <span class="switch-slider"></span>
+                </div>
+            </div>
+            <div class="toggle-row">
+                <span>HUD</span>
+                <div class="custom-switch">
+                    <input type="checkbox" id="show-ui" checked>
+                    <span class="switch-slider"></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewpoints-selector">
+            <div class="vp-grid">
+                <button class="vp-btn up" data-orbit-x="0" data-orbit-y="0" title="Top View">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7 14l5-5 5 5z" />
+                    </svg>
+                </button>
+                <button class="vp-btn left" data-orbit-x="-1.5708" data-orbit-y="1.5708" title="Left View">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M14 7l-5 5 5 5z" />
+                    </svg>
+                </button>
+                <button class="vp-btn home" data-orbit-x="-0.6" data-orbit-y="0.75" title="Home View">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                    </svg>
+                </button>
+                <button class="vp-btn right" data-orbit-x="-1.5708" data-orbit-y="-1.5708" title="Right View">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M10 17l5-5-5-5z" />
+                    </svg>
+                </button>
+                <button class="vp-btn down" data-orbit-x="-3.14159" data-orbit-y="0" title="Bottom View">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7 10l5 5 5-5z" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="vp-extra">
+                <button class="vp-btn-sm" data-orbit-x="-1.5708" data-orbit-y="0">FRONT</button>
+                <button class="vp-btn-sm" data-orbit-x="-1.5708" data-orbit-y="3.14159">BACK</button>
+            </div>
+        </div>
+
+        <!-- Primitive Switcher (Floating) -->
+        <div id="primitive-switcher">
+            <button class="prim-btn active" data-type="pyramid" title="Tetrahedron (Pyramid)">▲</button>
+            <button class="prim-btn" data-type="cube" title="Cube">■</button>
+            <button class="prim-btn" data-type="octahedron" title="Octahedron">◆</button>
+            <button class="prim-btn" data-type="dodecahedron" title="Dodecahedron">⬢</button>
+            <button class="prim-btn" data-type="icosahedron" title="Icosahedron">⬣</button>
+        </div>
+
+        <canvas id="game"></canvas>
+        <div id="infobar">
+            Verts:<span id="vertCount">8</span> |
+            Faces:<span id="faceCount">6</span> |
+            Mode:<span id="modeDisplay">ORBIT</span>
+        </div>
+
+        <!-- Performance HUD -->
+        <div id="perf-hud"
+            style="position: absolute; top: 20px; right: 20px; font-family: monospace; background: transparent; padding: 10px; pointer-events: none; text-transform: uppercase; font-size: 10px; text-align: right; line-height: 2; letter-spacing: 0.5px; width: 126px; box-sizing: border-box;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <span style="opacity: 0.3; color: #00ffd2;">FPS</span>
+                <span
+                    style="flex-grow: 1; border-bottom: 1px dotted rgba(0, 255, 210, 0.1); margin: 0 8px; position: relative; top: -3px;"></span>
+                <span id="hud-fps"
+                    style="color: #00ffd2; font-weight: bold; text-shadow: 0 0 10px rgba(0, 255, 210, 0.3);">0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <span style="opacity: 0.3; color: #59fcd9;">GEO</span>
+                <span
+                    style="flex-grow: 1; border-bottom: 1px dotted rgba(89, 252, 217, 0.1); margin: 0 8px; position: relative; top: -3px;"></span>
+                <span style="color: #59fcd9;"><span id="hud-mem">0.00</span><span
+                        style="font-size: 8px; opacity: 0.6; margin-left: 2px;">MB</span></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <span style="opacity: 0.3; color: #b3f7ed;">CPU</span>
+                <span
+                    style="flex-grow: 1; border-bottom: 1px dotted rgba(179, 247, 237, 0.1); margin: 0 8px; position: relative; top: -3px;"></span>
+                <span id="hud-cpu" style="color: #b3f7ed;">LOW</span>
+            </div>
+        </div>
+        <div id="loading-overlay" class="hidden">
+            <div class="loader-content">
+                <div class="spinner"></div>
+                <div class="loader-text">Analyzing Manifold...</div>
+                <div id="loader-progress">Synchronizing Primitives</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Retopology Modal -->
+    <div id="retopo-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>AUTO-RETOPOLOGY</h2>
+                <button class="close-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="control-group">
+                    <label>Target Resolution (LOD)</label>
+                    <input type="range" id="modal-strength" min="10" max="200" step="5" value="50">
+                    <span id="strength-val">50%</span>
+                </div>
+                <div class="control-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="modal-preserve-edges">
+                        <span class="checkmark"></span>
+                        Preserve Hard Edges (Representative)
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="modal-symmetry">
+                        <span class="checkmark"></span>
+                        Symmetry (Mirror +X to -X)
+                    </label>
+                </div>
+                <div class="info-text">
+                    "Preserve Edges" snaps to original vertices instead of averaging, maintaining sharp corners but may
+                    look jagged.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="modal-cancel">CANCEL</button>
+                <button id="modal-confirm" class="primary">OPTIMIZE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fragmented Logic -->
+    <script src="js/core/math.js?v=3"></script>
+    <script src="js/core/renderer.js?v=3"></script>
+    <script src="js/data/data.js?v=3"></script>
+    <script src="js/core/parser.js?v=3"></script>
+    <script src="js/state/store.js?v=3"></script>
+
+    <!-- Engine Modules -->
+    <script src="js/ui/ui.js?v=3"></script>
+    <script src="js/ui/colorpicker.js?v=3"></script>
+    <script src="js/io/transfer.js?v=3"></script>
+    <script src="js/interaction/controls.js?v=3"></script>
+    <script src="js/core/engine.js?v=3"></script>
+
+    <!-- Entry Point -->
+    <script src="js/index.js?v=3"></script>
+</body>
+
+</html>

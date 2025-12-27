@@ -1,0 +1,395 @@
+/**
+ * VEETANCE Viewport Styles
+ * Canvas container, view cube, info bar
+ */
+
+#viewport {
+    flex: 1;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+}
+
+/* UI Overlay Toggle - Clean View */
+#viewport.no-ui>*:not(canvas):not(#viewport-toggles) {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease;
+}
+
+#viewport-toggles {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Push down when sidebar is collapsed to accommodate Expand button */
+#sidebar.collapsed+#viewport #viewport-toggles {
+    top: 64px;
+    transition: top 0.3s ease;
+}
+
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(10px);
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    min-width: 110px;
+    box-sizing: border-box;
+}
+
+.toggle-row span {
+    font-size: 9px;
+    font-weight: 800;
+    color: #444;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+#viewport.no-ui #viewport-toggles {
+    opacity: 0.3;
+    /* Dim but visible */
+}
+
+#viewport.no-ui #viewport-toggles:hover {
+    opacity: 1;
+}
+
+/* Main Canvas */
+canvas#game {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: grab;
+}
+
+canvas#game:active {
+    cursor: grabbing;
+}
+
+/* View Cube */
+#viewcube {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #333;
+    border-radius: 8px;
+}
+
+#viewcube canvas {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+/* Info Bar */
+#infobar {
+    position: absolute;
+    bottom: 74px;
+    /* Stacked above Primitive Switcher (20px + ~46px + 8px gap) */
+    left: 20px;
+    min-width: 204px;
+    width: auto;
+    /* Matches Switcher Width */
+    box-sizing: border-box;
+    padding: 6px 16px;
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    color: #444;
+    font-size: 10px;
+    font-weight: 700;
+    pointer-events: none;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#infobar span {
+    color: #00ffd2;
+    margin: 0 6px;
+}
+
+/* Viewpoints Selector - Unified Microsoft 3D Style */
+#viewpoints-selector {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 126px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    z-index: 100;
+}
+
+.vp-grid {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vp-btn {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    /* Squircle */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+}
+
+.vp-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: #555;
+}
+
+.vp-btn:hover {
+    border-color: #00ffd2;
+    background: rgba(0, 255, 210, 0.1);
+}
+
+.vp-btn:hover svg {
+    fill: #00ffd2;
+}
+
+.vp-btn.up {
+    top: 0;
+}
+
+.vp-btn.down {
+    bottom: 0;
+}
+
+.vp-btn.left {
+    left: 0;
+}
+
+.vp-btn.right {
+    right: 0;
+}
+
+.vp-btn.home {
+    width: 38px;
+    height: 38px;
+    background: rgba(25, 25, 25, 0.8);
+    border-radius: 10px;
+    /* Enhanced Squircle for Home */
+}
+
+/* Extra Viewports (Front/Back) - Unified Below Grid */
+.vp-extra {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+}
+
+.vp-btn-sm {
+    flex: 1;
+    background: rgba(40, 40, 40, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: #444;
+    font-size: 8px;
+    font-weight: 900;
+    padding: 4px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.vp-btn-sm:hover {
+    border-color: #00ffd2;
+    color: #00ffd2;
+}
+
+/* Primitive Switcher - Floating UI */
+#primitive-switcher {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 204px;
+    /* 5 buttons(32) + 4 gaps(8) + 12 padding */
+    box-sizing: border-box;
+    display: flex;
+    gap: 8px;
+    padding: 6px;
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    z-index: 50;
+}
+
+.prim-btn {
+    width: 32px;
+    height: 32px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #555;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.prim-btn:hover {
+    border-color: #00ffd2;
+    color: #00ffd2;
+    background: #00ffd211;
+}
+
+.prim-btn.active {
+    background: #00ffd2;
+    color: #000;
+    border-color: #00ffd2;
+    box-shadow: 0 0 15px rgba(0, 255, 210, 0.3);
+}
+
+/* Loading Overlay */
+#loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    transition: opacity 0.3s ease;
+}
+
+#loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(0, 255, 210, 0.1);
+    border-top: 4px solid #00ffd2;
+    border-radius: 16px;
+    /* Squircle Loader */
+    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    box-shadow: 0 0 20px rgba(0, 255, 210, 0.2);
+}
+
+.loader-text {
+    font-size: 0.8rem;
+    color: #00ffd2;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(0, 255, 210, 0.4);
+}
+
+#loader-progress {
+    font-size: 0.6rem;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Floating Vertical Zoom */
+#v-zoom-container {
+    position: absolute;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 200px;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    z-index: 150;
+    padding: 10px 0;
+}
+
+#v-zoom {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 6px;
+    height: 160px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    outline: none;
+    writing-mode: bt-lr;
+    /* Vertical orientation for some browsers */
+    transform: rotate(180deg);
+    /* Common hack for verticality fallback */
+}
+
+#v-zoom::-webkit-slider-runnable-track {
+    width: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+#v-zoom::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #00ffd2;
+    border-radius: 4px;
+    /* Squircle Thumb */
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 255, 210, 0.4);
+    margin-left: -4px;
+    /* Center thumb on track */
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
