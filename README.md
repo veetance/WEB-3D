@@ -22,6 +22,7 @@ A pure HTML/CSS/JavaScript 3D rendering engine built from first principles.
 | [Painters Algorithm](painters-algorithm.md) | Depth sorting |
 | [Optimization](optimization.md) | Radix Sort implementation |
 | [Writing Pixels](writing-pixels.md) | ImageData and CPU shaders |
+| [VEETANCE Chronicle](docs/VEETANCE_CHRONICLE.md) | Recent high-fidelity recalibrations |
 | [File Structure](file-structure.md) | Project architecture |
 
 ---

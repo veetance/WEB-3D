@@ -7,16 +7,88 @@ self.onmessage = function (e) {
     if (task === 'decimate') {
         try {
             const result = cluster(data, config.resolution, config.preserveEdges);
-            // Validate Result Integrity
             if (!result || !result.vertices || result.vertices.length === 0) {
                 throw new Error("Decimation produced empty mesh");
             }
             self.postMessage({ task: 'decimate_complete', result });
         } catch (err) {
             console.error("Worker Computation Error:", err);
-            // Fallback: return original
             self.postMessage({ task: 'decimate_complete', result: data });
         }
+    }
+
+    // --- NEW: Barycentric Generator ---
+    if (task === 'buffer_gen') {
+        // data = { indices: Uint32Array, vertexCount: number }
+        // We need 1 barycentric vec3 per vertex.
+        // BUT: Barycentrics are per-triangle corner.
+        // If we share vertices (Indexed Draw), we have a problem:
+        // Vertex A might be (1,0,0) in Triangle 1 but (0,1,0) in Triangle 2.
+
+        // CRITICAL SOLVE: We must UNROLL the mesh to use Barycentrics? 
+        // OR: Use `gl_VertexID` logic in shader (WebGL 2 only).
+        // OR: Just allocate a new non-indexed array? No, simpler.
+
+        // Wait. If we use indexed drawing, we cannot assign unique barycentrics to shared vertices.
+        // Therefore, for "Solid Wireframe", we actually need NON-INDEXED geometry (Triangle Soup) 
+        // OR we duplicate vertices at seams.
+
+        // For efficiency in this "Beauty Mode", let's assume we might need to explode the mesh 
+        // if we want perfect wireframes.
+
+        // HOWEVER, for smooth shading we need shared normals.
+        // Splitting vertices breaks smooth shading.
+
+        // HYBRID APPROACH:
+        // We will generate the barycentric buffer assuming non-shared vertices?
+        // No. If we want wireframes on a shared mesh, we usually need the `geometry shader` (not in WebGL 1).
+
+        // CHANGE OF PLAN: We will fallback to the "Exploded" method just for the Visuals?
+        // No, too much memory.
+
+        // Let's use the standard "3-float-per-triangle" repeating pattern 
+        // and accept that shared vertices might conflict?
+        // Actually, if we map the barycentrics blindly (0,1,2, 0,1,2...) based on index order?
+        // No, attributes are fetched by vertex index.
+
+        // OK. We return a "Packed" buffer where we Unroll the indices.
+        // Render Type: gl.TRIANGLES (non-indexed)
+        // This bloats memory x3 but gives perfect wireframes.
+
+        const indices = data.indices;
+        const vertices = data.vertices; // Float32Array [x,y,z...]
+
+        const triCount = indices.length / 3;
+        const newVerts = new Float32Array(triCount * 3 * 3); // 3 verts * 3 coords
+        const newBary = new Float32Array(triCount * 3 * 3);  // 3 verts * 3 coords
+        const newInds = new Uint32Array(triCount * 3);       // For data consistency
+
+        for (let i = 0; i < triCount; i++) {
+            const i3 = i * 3;
+            const idx0 = indices[i3], idx1 = indices[i3 + 1], idx2 = indices[i3 + 2];
+
+            // Unroll Vertex Positions
+            newVerts.set([vertices[idx0 * 3], vertices[idx0 * 3 + 1], vertices[idx0 * 3 + 2]], i3 * 9 + 0);
+            newVerts.set([vertices[idx1 * 3], vertices[idx1 * 3 + 1], vertices[idx1 * 3 + 2]], i3 * 9 + 3);
+            newVerts.set([vertices[idx2 * 3], vertices[idx2 * 3 + 1], vertices[idx2 * 3 + 2]], i3 * 9 + 6);
+
+            // Assign Barycentrics
+            newBary.set([1, 0, 0, 0, 1, 0, 0, 0, 1], i3 * 9);
+
+            // New Linear Indices
+            newInds[i3] = i3;
+            newInds[i3 + 1] = i3 + 1;
+            newInds[i3 + 2] = i3 + 2;
+        }
+
+        self.postMessage({
+            task: 'buffer_gen_complete',
+            result: {
+                vertices: newVerts,
+                barycentric: newBary,
+                indices: newInds
+            }
+        }, [newVerts.buffer, newBary.buffer, newInds.buffer]);
     }
 };
 

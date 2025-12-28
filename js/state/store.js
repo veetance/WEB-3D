@@ -14,24 +14,34 @@ window.ENGINE = window.ENGINE || {};
         modelMatrix: new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
 
         camera: {
-            orbitX: -0.6,
-            orbitY: 0.75,
-            zoom: 12,
-            target: { x: 0, y: 0, z: 0 }
+            orbitX: -0.8,
+            orbitY: 0,
+            zoom: 15.6,
+            target: { x: 0, y: 0, z: 0 },
+            // Physics Properties
+            velX: 0,
+            velY: 0,
+            panVelX: 0,
+            panVelY: 0,
+            damping: 0.95, // Friction (0.95 = 5% drag per frame)
+            mass: 1.0
         },
         object: {
             pos: { x: 0, y: 0, z: 0 },
             rot: { x: 0, y: 0, z: 0 },
-            scl: { x: 1, y: 1, z: 1 }
+            scl: { x: 1, y: 1, z: 1 },
+            edges: null
         },
         config: {
             zOffset: 0,
             thickness: 1,
             fg: '#00ffd2',
             polyColor: '#1a1a1a',
+            hardwareMode: 'GPU', // 'GPU' or 'CPU'
             bg: '#0a0a0a',
             auto: false,
             showGrid: true,
+            showDiagonals: false, // Default: Clean Wireframe
             showHUD: true,
             viewMode: 'SHADED_WIRE',
             fov: 1.5
@@ -68,11 +78,36 @@ window.ENGINE = window.ENGINE || {};
     function reducer(state, action) {
         switch (action.type) {
             case 'UPDATE_CONFIG':
-                return { ...state, config: { ...state.config, ...action.payload } };
+                return {
+                    ...state,
+                    config: { ...state.config, ...action.payload }
+                };
             case 'UPDATE_CAMERA':
-                return { ...state, camera: { ...state.camera, ...action.payload } };
+                return {
+                    ...state,
+                    camera: { ...state.camera, ...action.payload }
+                };
             case 'UPDATE_OBJECT':
-                return { ...state, object: { ...state.object, ...action.payload } };
+                return {
+                    ...state,
+                    object: { ...state.object, ...action.payload }
+                };
+            case 'UPDATE_STATS':
+                return {
+                    ...state,
+                    ui: {
+                        ...state.ui,
+                        stats: { ...state.ui.stats, ...action.payload }
+                    }
+                };
+            case 'TOGGLE_SIDEBAR':
+                return {
+                    ...state,
+                    ui: {
+                        ...state.ui,
+                        isSidebarCollapsed: !state.ui.isSidebarCollapsed
+                    }
+                };
 
             case 'SET_PRIMITIVE': {
                 const primGen = window.ENGINE.Data.primitives[action.payload];
@@ -82,6 +117,10 @@ window.ENGINE = window.ENGINE || {};
                     ...state,
                     vertices: data.vertices,
                     indices: data.indices,
+                    object: {
+                        ...state.object,
+                        edges: data.edges || null // Inject Edges
+                    },
                     ui: {
                         ...state.ui,
                         currentPrimitive: action.payload,
@@ -94,14 +133,17 @@ window.ENGINE = window.ENGINE || {};
             }
 
             case 'SET_MODEL': {
-                // Expects { vertices: Float32Array, indices: TypedArray }
                 return {
                     ...state,
                     vertices: action.payload.vertices,
                     indices: action.payload.indices,
+                    object: {
+                        ...state.object,
+                        edges: null // PURGE GHOST EDGES
+                    },
                     ui: {
                         ...state.ui,
-                        currentPrimitive: null,
+                        currentPrimitive: action.payload.name || 'EXTERNAL',
                         info: {
                             verts: action.payload.vertices.length / 3,
                             faces: action.payload.indices.length / 3

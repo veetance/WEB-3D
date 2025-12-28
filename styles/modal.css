@@ -215,7 +215,6 @@
 #modal-confirm:hover {
     background: #fff;
     border-color: #fff;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
 
 #strength-val {

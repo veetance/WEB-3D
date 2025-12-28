@@ -1,0 +1,105 @@
+/** 
+ * VEETANCE Gizmo Island Styles
+ * Floating top-center control island.
+ */
+
+#gizmo-island {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 14px;
+    padding: 2px;
+    z-index: 1000;
+    user-select: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#gizmo-island:hover {
+    background: rgba(15, 15, 15, 0.5);
+    border-color: rgba(0, 255, 210, 0.1);
+}
+
+.gizmo-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    min-width: 50px;
+    justify-content: center;
+    position: relative;
+}
+
+.gizmo-btn .material-symbols-outlined {
+    font-size: 22px !important;
+    font-variation-settings: 'wght' 200, 'opsz' 20;
+    transition: transform 0.2s ease;
+}
+
+.btn-label {
+    position: absolute;
+    bottom: -18px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    color: #00ffd2;
+}
+
+.gizmo-btn:hover {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.gizmo-btn:hover .btn-label {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gizmo-btn:hover .material-symbols-outlined {
+    transform: translateY(-2px);
+}
+
+.gizmo-btn.active {
+    color: #00ffd2;
+    background: rgba(0, 255, 210, 0.05);
+    box-shadow: inset 0 0 0 1px rgba(0, 255, 210, 0.3);
+}
+
+/* Icons for Gizmo Buttons if needed later */
+.gizmo-btn svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.6;
+}
+
+.gizmo-btn.active svg {
+    opacity: 1;
+}
+
+/* Separator */
+.gizmo-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 4px;
+}

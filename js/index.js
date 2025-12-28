@@ -7,8 +7,13 @@
     const ctx = canvas ? canvas.getContext('2d') : null;
 
     function init() {
-        localStorage.clear(); // Wipe potential contaminated state
-        if (!canvas || !ctx) return;
+        localStorage.clear();
+        if (!canvas) return;
+
+        // Foundational Hardware Check
+        const isGL = window.ENGINE.GL.init(canvas);
+        const ctx = isGL ? canvas.getContext('webgl') : canvas.getContext('2d');
+        window.ENGINE.isGL = isGL;
 
         // GLOBAL ERROR TRAP
         window.onerror = function (msg, url, lineNo, columnNo, error) {

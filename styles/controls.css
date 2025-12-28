@@ -97,7 +97,6 @@ input:checked+.switch-slider {
 input:checked+.switch-slider:before {
     transform: translateX(14px);
     background-color: #00ffd2;
-    box-shadow: 0 0 8px #00ffd288;
 }
 
 .switch-row {
@@ -116,7 +115,7 @@ input:checked+.switch-slider:before {
 .mode-btn {
     padding: 10px 0;
     border: 1px solid #333;
-    background: #1a1a1a;
+    background: #1a1a1a00;
     color: #666;
     border-radius: 6px;
     cursor: pointer;
@@ -132,7 +131,7 @@ input:checked+.switch-slider:before {
 }
 
 .mode-btn.active {
-    background: #00ffd2;
+    background: #00ffd000;
     color: #000;
     border-color: #00ffd2;
 }
@@ -165,6 +164,63 @@ input:checked+.switch-slider:before {
 
 .btn-group .mode-btn:not(:last-child) {
     border-right: 1px solid #222;
+}
+
+/* Base View Button Stability */
+.btn-group .view-btn {
+    border: 1px solid transparent;
+    padding: 7px 0;
+    /* Pre-allocate height */
+}
+
+/* View Mode - Minimalist Match */
+.btn-group .view-btn.active {
+    background: transparent;
+    color: #00ffd2;
+    border-color: rgba(0, 255, 210, 0.3);
+}
+
+/* Match container corner radius for edge buttons */
+.btn-group .view-btn.active:first-child {
+    border-radius: 6px 0 0 6px;
+}
+
+.btn-group .view-btn.active:last-child {
+    border-radius: 0 6px 6px 0;
+}
+
+/* Unified Hardware Switch Container */
+.btn-group.hw-switch {
+    background: transparent;
+    border: 1px solid #333;
+    /* Clinical Gray Outline */
+    border-radius: 4px;
+    overflow: hidden;
+    gap: 0;
+    margin-top: 10px;
+}
+
+.btn-group.hw-switch .mode-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 4px solid transparent;
+    /* Prepared for thick bottom */
+    padding: 6px 0;
+    margin: 0;
+    transition: all 0.2s ease;
+}
+
+.btn-group.hw-switch .mode-btn.active {
+    background: transparent;
+    color: #00ffd2;
+    border-bottom-color: #00ffd2;
+    /* Bright thick bottom pop */
+}
+
+/* Internal separator */
+.btn-group.hw-switch .mode-btn:not(:last-child) {
+    border-right: 1px solid #333;
+    /* Gray separator */
 }
 
 /* Manifold Transfer */
@@ -209,6 +265,29 @@ input:checked+.switch-slider:before {
 .upload-btn.secondary {
     border-color: #333;
     color: #666;
+}
+
+/* Optimization & Reset - Translucent Filled Motif (Border-free) */
+#reduceBtn {
+    background: rgba(0, 255, 210, 0.1);
+    border: none;
+    color: rgba(0, 255, 210, 0.9);
+}
+
+#reduceBtn:hover {
+    background: rgba(0, 255, 210, 0.2);
+    color: #00ffd2;
+}
+
+#resetGeomBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: #555;
+}
+
+#resetGeomBtn:hover {
+    color: #ff3e3e;
+    background: rgba(255, 62, 62, 0.12);
 }
 
 .upload-btn.secondary:hover {

@@ -130,13 +130,12 @@ canvas#game:active {
     position: absolute;
     bottom: 20px;
     right: 20px;
-    width: 126px;
+    width: 120px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
+    padding: 10px;
     background: rgba(10, 10, 10, 0.4);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -144,36 +143,83 @@ canvas#game:active {
     z-index: 100;
 }
 
+.vp-modes {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.vp-modes .vp-btn {
+    position: static;
+    /* Override grid positioning */
+    flex: 1;
+    height: 32px;
+}
+
+.vp-modes .vp-btn.active {
+    border-color: #00ffd2;
+    background: rgba(0, 255, 210, 0.05);
+}
+
+.vp-modes .vp-btn.active svg {
+    fill: #00ffd2;
+}
+
 .vp-grid {
-    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 4px;
     width: 100px;
     height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .vp-btn {
-    position: absolute;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     background: rgba(20, 20, 20, 0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    /* Squircle */
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     padding: 0;
+    font-size: 16px;
+    /* High density large */
+    font-weight: 200;
+    /* Ultra thin */
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'Inter', sans-serif;
 }
 
-.vp-btn svg {
-    width: 16px;
-    height: 16px;
-    fill: #555;
+/* Corner Modes (Transparent + Border) */
+.vp-btn.mode-vp {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* Finer border */
+    opacity: 0.6;
+    /* Reduced by 40% */
+}
+
+.vp-btn.mode-vp:hover,
+.vp-btn.mode-vp.active {
+    opacity: 1;
+}
+
+.material-symbols-outlined {
+    font-size: 18px !important;
+    font-variation-settings: 'wght' 200, 'opsz' 20;
+    color: inherit;
+}
+
+/* Orbit specific scaling - 1.5x larger */
+.vp-btn.orbit .material-symbols-outlined {
+    font-size: 24px !important;
 }
 
 .vp-btn:hover {
@@ -181,32 +227,32 @@ canvas#game:active {
     background: rgba(0, 255, 210, 0.1);
 }
 
-.vp-btn:hover svg {
-    fill: #00ffd2;
+.vp-btn:hover .material-symbols-outlined,
+.vp-btn:hover {
+    color: #00ffd2;
 }
 
-.vp-btn.up {
-    top: 0;
+.vp-btn.active {
+    border-color: #00ffd2;
+    background: rgba(0, 255, 210, 0.05);
 }
 
-.vp-btn.down {
-    bottom: 0;
+.vp-btn.active .material-symbols-outlined,
+.vp-btn.active {
+    color: #00ffd2;
 }
 
-.vp-btn.left {
-    left: 0;
-}
-
-.vp-btn.right {
-    right: 0;
+/* High Contrast for active F/B */
+.vp-btn.mode-vp.active {
+    color: #00ffd2;
 }
 
 .vp-btn.home {
-    width: 38px;
-    height: 38px;
     background: rgba(25, 25, 25, 0.8);
-    border-radius: 10px;
-    /* Enhanced Squircle for Home */
+    border-radius: 8px;
+    width: 30px;
+    /* Unified size for grid */
+    height: 30px;
 }
 
 /* Extra Viewports (Front/Back) - Unified Below Grid */
@@ -239,32 +285,39 @@ canvas#game:active {
     position: absolute;
     bottom: 20px;
     left: 20px;
-    width: 204px;
-    /* 5 buttons(32) + 4 gaps(8) + 12 padding */
     box-sizing: border-box;
     display: flex;
-    gap: 8px;
+    align-items: center;
+    /* Enforce center, prevent stretch */
+    gap: 6px;
     padding: 6px;
-    background: rgba(10, 10, 10, 0.6);
-    backdrop-filter: blur(8px);
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
+    border-radius: 10px;
     z-index: 50;
 }
 
 .prim-btn {
     width: 32px;
     height: 32px;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    color: #555;
-    border-radius: 4px;
+    min-width: 32px;
+    /* Force minimums */
+    min-height: 32px;
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    /* High-fidelity Squircle */
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+    flex-shrink: 0;
+    /* No squashing */
 }
 
 .prim-btn:hover {
@@ -277,7 +330,6 @@ canvas#game:active {
     background: #00ffd2;
     color: #000;
     border-color: #00ffd2;
-    box-shadow: 0 0 15px rgba(0, 255, 210, 0.3);
 }
 
 /* Loading Overlay */
@@ -309,23 +361,63 @@ canvas#game:active {
 }
 
 .spinner {
-    width: 60px;
-    height: 60px;
-    border: 4px solid rgba(0, 255, 210, 0.1);
-    border-top: 4px solid #00ffd2;
-    border-radius: 16px;
-    /* Squircle Loader */
-    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-    box-shadow: 0 0 20px rgba(0, 255, 210, 0.2);
+    width: 48px;
+    height: 48px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Outer Square */
+.spinner::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #00ffd2;
+    border-radius: 4px;
+    animation: rotate-cw 2s linear infinite;
+}
+
+/* Inner Square */
+.spinner::after {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    border: 1px solid rgba(0, 255, 210, 0.5);
+    border-radius: 2px;
+    animation: rotate-ccw 1.5s linear infinite;
+}
+
+@keyframes rotate-cw {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotate-ccw {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(-360deg);
+    }
 }
 
 .loader-text {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     color: #00ffd2;
-    font-weight: 700;
-    letter-spacing: 2px;
+    font-weight: 200;
+    /* Thin as requested in previous steps */
+    letter-spacing: 4px;
     text-transform: uppercase;
-    text-shadow: 0 0 10px rgba(0, 255, 210, 0.4);
 }
 
 #loader-progress {
@@ -383,13 +475,6 @@ canvas#game:active {
     border-radius: 4px;
     /* Squircle Thumb */
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(0, 255, 210, 0.4);
     margin-left: -4px;
     /* Center thumb on track */
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
 }

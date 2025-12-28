@@ -1,49 +1,40 @@
-# VFE Engine Roadmap
+# VEETANCE Engine Manifest & Roadmap 🦾📊
 
-Our journey to create a world-class, baremetal 3D indie game engine.
+## [1] Manifold Audit: Phase 4 Synthesis ✅
+MrVee, we have transformed the engine from a terrestrial script into a high-octane **Hybrid Graphics Manifold**.
 
----
-
-## Phase 1: Foundation (Complete)
-- [x] Baremetal Math (Projection, Rotation, Translation)
-- [x] Solid Geometry Support (Proper Closed Manifolds)
-- [x] GLB/OBJ Parsing (Direct Binary Buffer Extraction)
-- [x] Optimized Depth Sorting (Linear Time O(n) Radix Sort)
-- [x] Pure CSS HUD & Layout System
-
----
-
-## Phase 2: Dual-Mode Architecture
-- [ ] **CPU Mode:** Canvas 2D Painter's Algorithm (Existing)
-- [ ] **GPU Mode:** Raw WebGL context with custom GLSL Shader compiler
-- [ ] **The "Switch":** Real-time toggle between CPU rasterizer and GPU frag/vert shaders
-- [ ] **Common Interface:** Unified rendering call that abstracts the backend
+### **ADDED (The High-Fidelity Foundations)**
+*   **Modular Architecture**: UI is now fragmented (`sidebar.js`, `hud.js`) and orchestrated by a central `UIMaster`.
+*   **Streaming I/O pipeline**: Multi-threaded, chunk-based OBJ parsing via Web Workers. No more UI freeze on large imports.
+*   **The "Deep Crunch" CPU Loop**: Zero-allocation rendering, O(N) Radix Sort, and batched Canvas 2D Rasterization. 🚀
+*   **The GPU Hardware Layer**: Full WebGL 1.0 integration with 32-bit index support and Hardware-Accelerated Depth Buffering.
+*   **Bio-Shader Foundation**: Integrated Z-Depth Fog, Real-time Edge Emittance (Veins), and Color Quantization.
+*   **Hybrid Power Switch**: Dedicated **GPU/CPU Toggle** to balance load based on manifold density.
+*   **Geometric Perfection**: Corrected Dodecahedron, Icosahedron, and Octahedron primitives. ✧
+*   **Structural Wireframes**: Implemented "Clean Perimeter" rendering logic, erasing internal diagonals for both GPU and CPU. 🔳
 
 ---
 
-## Phase 3: Game Core & Simulation
-- [ ] **Input System:** Integrated Keyboard/Mouse/Gamepad mapping
-- [ ] **Physics (WASM/Rust):** 
-  - Cross-compiling Rust to WebAssembly for heavy vector math
-  - AABB and Mesh-based collision detection
-  - Gravity and Impulse systems
-- [ ] **Scene Graph:** Parent-child transforms for skeletal/hierarchical objects
+## [2] The Next Frontier: Remaining Objectives 🛰️🔭
+
+### **The "Novel" Renderer (Final BEAUTY FX)**
+*   **ASCII Overlay**: Injecting the character-based luminance mapping.
+*   **Crosshatched Shadows**: Designing the GLSL logic to replace standard gradients with digital cross-hatching.
+
+### **Hardware Optimizations**
+*   **Static Buffer Optimization**: Move to Static VBOs with Uniform Matrices for 144+ FPS performance (eliminated per-frame BUS upload).
+*   **Nanite-Level Mesh Optimization**: Implement **Coplanar Merging** (Greedy Meshing) in `optimizer.js` to reduce polycounts on flat surfaces.
+
+### **System Architecture**
+*   **The Scene Graph (Outliner)**: Moving from "One Model" to a Multi-Object Workspace with hierarchical parent-child transforms.
+*   **Binary Streaming**: Adding direct **GLB/glTF** binary support for ultra-fast data ingestion.
 
 ---
 
-## Phase 4: Shading & FX
-- [ ] **Custom Shaders:** GLSL Fragment/Vertex shader support
-- [ ] **Lighting:** Flat, Gouraud, and basic Phong reflection
-- [ ] **Post-Processing:** Kernel-based effects (Blur, Bloom, Chromatic Aberration) implemented in GPU shaders
+## Historical Archive (Draft)
+*   **Phase 1**: Foundational Math, Radix Sort, HUD. (Complete)
+*   **Phase 2**: Dual-Mode Hybrid Context. (Complete)
+*   **Phase 3**: Multi-threaded Parsing. (Complete)
 
 ---
-
-## Phase 5: Developer Tooling
-- [ ] **In-Engine Editor:** Move/Rotate/Scale objects in the viewport
-- [ ] **Hierarchy Tree:** Visual manifold management
-- [ ] **Scene Serialization:** Save/Load levels as pure JSON
-- [ ] **Asset Pipeline:** Live hot-reloading for GLB/OBJ models
-
----
-
 *VEETANCE: Built on the iron of the hardware, not the fluff of the libraries.*

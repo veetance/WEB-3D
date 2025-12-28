@@ -8,15 +8,21 @@ window.ENGINE.Transfer = (function () {
     const Parser = window.ENGINE.Parser;
 
     function init() {
-        // UI Elements
-        const fileInput = document.getElementById('fileInput');
+        const fileInput = document.getElementById('import-file');
         const downloadAnchor = document.getElementById('downloadAnchor');
         const exportBtn = document.getElementById('exportBtn');
         const loader = document.getElementById('loading-overlay');
 
         if (fileInput) {
             fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) handleFile(e.target.files[0], loader);
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    if (file.name.toLowerCase().endsWith('.obj') && window.ENGINE.StreamingTransfer) {
+                        window.ENGINE.StreamingTransfer.streamOBJ(file);
+                    } else {
+                        handleFile(file, loader);
+                    }
+                }
             });
         }
 
@@ -35,13 +41,20 @@ window.ENGINE.Transfer = (function () {
                 try {
                     const name = file.name.split('.').slice(0, -1).join('.') || 'model';
                     // Parser returns { vertices: Float32Array, indices: Uint32Array }
-                    const model = file.name.endsWith('.glb')
+                    console.log(`VFE: Processing ${file.name}...`);
+                    const model = file.name.toLowerCase().endsWith('.glb')
                         ? Parser.parseGLB(ev.target.result)
                         : Parser.parseOBJ(ev.target.result);
 
+                    if (model.vertices.length === 0) throw new Error("Parsed model is empty");
+
                     store.dispatch({ type: 'SET_MODEL', payload: { ...model, name } });
-                    // Switch to wire for complex models initially for performance visible check
+
+                    // Clear primitive selection visuals
+                    document.querySelectorAll('.prim-btn').forEach(b => b.classList.remove('active'));
+
                     store.dispatch({ type: 'SET_VIEW_MODE', payload: 'WIRE' });
+                    console.log(`VFE: Model Matched. Manifold stabilized.`);
                 } catch (err) {
                     console.error('Core Logic IO Error:', err);
                 } finally {
