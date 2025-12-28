@@ -48,8 +48,13 @@ window.ENGINE = window.ENGINE || {};
         },
         ui: {
             isSidebarCollapsed: false,
-            transformMode: 'ORBIT',
+            transformMode: 'SELECT',
+            transformSpace: 'GLOBAL', // 'LOCAL', 'GLOBAL', 'SCREEN'
             currentPrimitive: 'pyramid',
+            selectedObjectId: null, // Only set when user clicks to select
+            hoveredObjectId: null, // Object being hovered (for outline)
+            dragAxis: null, // 'x', 'y', 'z', or null
+            hoveredAxis: null, // 'x', 'y', 'z', or null (for visual feedback)
             info: { verts: 0, faces: 0 },
             stats: { fps: 0, mem: 0 }
         }
@@ -160,6 +165,21 @@ window.ENGINE = window.ENGINE || {};
 
             case 'SET_TRANSFORM_MODE':
                 return { ...state, ui: { ...state.ui, transformMode: action.payload } };
+
+            case 'SET_DRAG_AXIS':
+                return { ...state, ui: { ...state.ui, dragAxis: action.payload } };
+
+            case 'SET_HOVERED_AXIS':
+                return { ...state, ui: { ...state.ui, hoveredAxis: action.payload } };
+
+            case 'SET_TRANSFORM_SPACE':
+                return { ...state, ui: { ...state.ui, transformSpace: action.payload } };
+
+            case 'SET_HOVERED_OBJECT':
+                return { ...state, ui: { ...state.ui, hoveredObjectId: action.payload } };
+
+            case 'SET_SELECTED_OBJECT':
+                return { ...state, ui: { ...state.ui, selectedObjectId: action.payload } };
 
             default:
                 return state;

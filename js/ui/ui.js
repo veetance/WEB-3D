@@ -1,4 +1,4 @@
-/** 
+/**
  * VEETANCE User Interface Orchestrator
  * Delegating to Sidebar, HUD, and Input modules.
  */
@@ -52,15 +52,24 @@ window.ENGINE.UI = {
             store.dispatch({ type: 'SET_PRIMITIVE', payload: state.ui.currentPrimitive || 'cube' });
         });
 
-        // --- Streaming I/O Integration is handled in transfer.js ---
-
-
+        // Export button
         const exportBtn = document.getElementById('exportBtn');
         if (exportBtn) {
             exportBtn.addEventListener('click', () => {
-                // Delegation to transfer.js logic if needed (Legacy Support)
                 if (window.ENGINE.Transfer) window.ENGINE.Transfer.exportOBJ();
             });
         }
+
+        // GPU/CPU hardware switcher
+        const hwButtons = document.querySelectorAll('.mode-btn[data-hw]');
+        hwButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.hw.toUpperCase();
+                window.ENGINE.Renderer.setMode(mode);
+                window.ENGINE.Renderer.init(document.getElementById('game'));
+                // Update active class UI
+                hwButtons.forEach(b => b.classList.toggle('active', b === btn));
+            });
+        });
     }
 };

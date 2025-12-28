@@ -142,6 +142,42 @@ window.ENGINE.Core = (function () {
         } else {
             Rasterizer.drawPoints(ctx, buffers.screen, vCount, config);
         }
+
+        // --- GIZMO & SELECTION RENDERING ---
+        const GR = window.ENGINE.GizmoRenderer;
+        const mode = state.ui.transformMode.toUpperCase();
+        const fovScale = config.fov * 400;
+        const origin = [object.pos.x, object.pos.y, object.pos.z];
+
+        // Draw hover outline when hovering over object (works in ALL modes)
+        if (!useGL && GR && state.ui.hoveredObjectId && !state.ui.selectedObjectId && buffers && buffers.screen) {
+            GR.drawHoverOutline(ctx, buffers.screen, indices, fCount, '#66ccff');
+        }
+
+        // Draw origin circle when object is selected (SELECT mode only for the circle)
+        if (mode === 'SELECT' && !useGL && GR && state.ui.selectedObjectId) {
+            GR.drawSelectionOutline(ctx, origin, mView, canvas.width, canvas.height, fovScale);
+        }
+
+        // Draw transform gizmos ONLY when object is selected AND in TRANSLATE/ROTATE/SCALE modes
+        if (GR && state.ui.selectedObjectId && (mode === 'TRANSLATE' || mode === 'ROTATE' || mode === 'SCALE')) {
+            const hoveredAxis = state.ui.hoveredAxis;
+            const dragAxis = state.ui.dragAxis;
+            const space = state.ui.transformSpace;
+            const objectRot = object.rot;
+            const cameraOrbitY = camera.orbitY;
+
+            if (mode === 'TRANSLATE') {
+                window.ENGINE.gizmoHitZones = GR.drawTranslate(ctx, origin, mView, canvas.width, canvas.height, fovScale, objectRot, cameraOrbitY, space, hoveredAxis, dragAxis);
+            } else if (mode === 'ROTATE') {
+                window.ENGINE.gizmoHitZones = GR.drawRotate(ctx, origin, mView, canvas.width, canvas.height, fovScale, objectRot, cameraOrbitY, space, hoveredAxis, dragAxis);
+            } else if (mode === 'SCALE') {
+                window.ENGINE.gizmoHitZones = GR.drawScale(ctx, origin, mView, canvas.width, canvas.height, fovScale, objectRot, cameraOrbitY, space, hoveredAxis, dragAxis);
+            }
+        } else {
+            window.ENGINE.gizmoHitZones = [];
+        }
+
         if (loop) requestAnimationFrame(() => frame(ctx, canvas));
     }
     return { frame, update: (ctx, canvas) => frame(ctx, canvas, false) };

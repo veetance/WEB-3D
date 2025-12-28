@@ -119,11 +119,6 @@
     <main id="viewport">
         <!-- Gizmo Island (Top Center) -->
         <div id="gizmo-island">
-            <button class="gizmo-btn active" data-mode="select">
-                <span class="material-symbols-outlined">ink_selection</span>
-                <span class="btn-label">Select</span>
-            </button>
-            <div class="gizmo-divider"></div>
             <button class="gizmo-btn" data-mode="translate">
                 <span class="material-symbols-outlined">open_with</span>
                 <span class="btn-label">Move</span>
@@ -136,6 +131,12 @@
                 <span class="material-symbols-outlined">fullscreen</span>
                 <span class="btn-label">Scale</span>
             </button>
+            <div class="gizmo-divider"></div>
+            <div class="space-toggle">
+                <button class="space-btn" data-space="LOCAL" title="Local Space">L</button>
+                <button class="space-btn active" data-space="GLOBAL" title="Global Space">G</button>
+                <button class="space-btn" data-space="SCREEN" title="Screen Space">S</button>
+            </div>
         </div>
 
         <!-- Viewport Toggles (Top Left) -->
@@ -303,6 +304,8 @@
     <script src="js/io/streaming.js?v=3"></script>
     <script src="js/io/transfer.js?v=3"></script>
     <script src="js/interaction/controls.js?v=3"></script>
+    <script src="js/core/gizmoRenderer.js?v=3"></script>
+    <script src="js/core/gizmoHitTest.js?v=3"></script>
     <script src="js/core/engine.js?v=3"></script>
 
     <!-- Entry Point -->

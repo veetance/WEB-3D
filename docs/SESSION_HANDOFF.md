@@ -115,3 +115,38 @@ Systematically decommissioned the terrestrial "glow" motif to achieve absolute s
 - **Unified Gizmo Transform**: Implementation of on-stage draggables for Move/Rotate handle.
 
 ---
+
+# CHECKPOINT UPDATE (Gizmo Intelligence & Interaction) 🎮
+**Session ID:** 977f6435
+**Date:** 2025-12-27
+
+## 1. 3D Interaction Intelligence
+Implemented a robust, industry-standard 3D Translation Gizmo that operates purely in screen space (no raycasting).
+- **7-Handle Topology**:
+    - **3 Axes (Arrows)**: Constrained linear movement (X, Y, Z).
+    - **3 Planes (Squares)**: Constrained planar movement (XY, XZ, YZ).
+    - **1 Center (Circle)**: Free screen-space translation.
+- **Visual Intelligence**:
+    - **Corner Placement**: Plane handles are geometrically positioned at the intersection corners of axes for intuitive grabbing.
+    - **Color Blending**: Plane colors are derived from mixing axis colors (e.g., Red+Green = Yellow/XY).
+    - **Priority Hit-Testing**: Mouse detection prioritizes Center > Planes > Arrows to prevent selection conflicts.
+
+## 2. Vector Math & Movement
+- **Smart Drag Logic**:
+    - **Inversion Fixes**: Completely recalibrated drag vectors so mouse movement **always** matches object movement, regardless of camera angle.
+    - **Screen-Space Panning**: The Center handle now calculates `CameraRight` and `CameraUp` vectors dynamically from `orbitX` (Elevation) and `orbitY` (Azimuth), allowing perfect "Pan" behavior from any viewing angle.
+- **Coordinate Space Support**:
+    - **Global**: Align with World.
+    - **Local**: Align with Object.
+    - **Screen**: Align with Camera.
+
+## 3. UI Refinement
+- **Selection Consistency**:
+    - **Hover Silhouette**: Objects now glow with a `Blue-Cyan` contour when hovered.
+    - **Deselection Logic**: Clicking empty space no longer kills the selection effectively—only clicking another object does.
+    - **Labels**: Added clear "X", "Y", "Z" labels to the gizmo tips.
+
+## 4. Next Priorities 🚀
+- **Rotation Gizmo**: Implement interactive rings for 3-axis rotation.
+- **Scale Gizmo**: Implement axis-aligned scaling handles.
+- **Snap-to-Grid**: Add grid snapping logic for translation.

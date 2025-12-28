@@ -26,49 +26,55 @@ window.ENGINE.Gizmo = (function () {
             }
         };
 
-        // UI Click Handlers
+        // UI Click Handlers - Toggle behavior (click active = back to SELECT)
         [island, vpSelector].forEach(el => {
             if (el) {
                 el.addEventListener('click', (e) => {
                     const btn = e.target.closest('.gizmo-btn, .vp-btn');
                     if (btn && btn.dataset.mode) {
-                        store.dispatch({ type: 'SET_TRANSFORM_MODE', payload: btn.dataset.mode });
-                        e.stopPropagation(); // Prevent canvas reset
+                        const currentMode = store.getState().ui.transformMode;
+                        const clickedMode = btn.dataset.mode;
+                        // If clicking the active button, go back to SELECT
+                        if (currentMode.toUpperCase() === clickedMode.toUpperCase()) {
+                            store.dispatch({ type: 'SET_TRANSFORM_MODE', payload: 'SELECT' });
+                        } else {
+                            store.dispatch({ type: 'SET_TRANSFORM_MODE', payload: clickedMode });
+                        }
+                        e.stopPropagation();
                     }
                 });
             }
         });
 
-        // Click-Away Reset: Default back to 'SELECT' when clicking the stage
-        if (canvas) {
-            canvas.addEventListener('mousedown', () => {
-                const currentMode = store.getState().ui.transformMode;
-                // If in a camera-only mode from the pad, or a transient state, 
-                // we might want to stay there while dragging, but clicking 'void' usually resets.
-                // For now, let's allow Orbit/Pan to persist while dragging, 
-                // but clicking 'away' (mouseup without drag or specific trigger) could reset.
-                // Clinical requirement: "when user clicks away it deselects".
-            });
+        // Mode persistence: DO NOT auto-reset to SELECT on canvas click.
+        // User must explicitly click a mode button to change modes.
 
-            // Standard Reset on Canvas Click
-            canvas.addEventListener('click', (e) => {
-                const state = store.getState();
-                // If user clicks the background and not an object (TBD logic), reset to SELECT
-                // For now: any canvas click that isn't captured by a gizmo/UI resets.
-                if (state.ui.transformMode !== 'select') {
-                    store.dispatch({ type: 'SET_TRANSFORM_MODE', payload: 'select' });
-                }
+        // Coordinate Space Toggle (L/G/S)
+        const spaceButtons = document.querySelectorAll('.space-btn');
+        const updateSpaceUI = (space) => {
+            spaceButtons.forEach(b => {
+                b.classList.toggle('active', b.dataset.space === space);
             });
-        }
+        };
+
+        spaceButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const space = btn.dataset.space;
+                store.dispatch({ type: 'SET_TRANSFORM_SPACE', payload: space });
+                e.stopPropagation();
+            });
+        });
 
         // Sync with State
         store.subscribe(() => {
             const state = store.getState();
             updateUI(state.ui.transformMode);
+            updateSpaceUI(state.ui.transformSpace);
         });
 
         // Initial sync
         updateUI(store.getState().ui.transformMode);
+        updateSpaceUI(store.getState().ui.transformSpace);
     }
 
     return { init };
