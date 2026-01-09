@@ -145,9 +145,12 @@ window.ENGINE.Controls = {
                             store.dispatch({ type: 'SET_DRAG_AXIS', payload: axis });
                             canvas.style.cursor = 'grabbing';
 
-                            // Initialize Drag Lock Manifest
+                            // Initialize Drag Lock Manifest (DPI Aware)
                             const obj = state.object;
                             dragStartPos = { ...obj.pos };
+
+                            const dpr = window.devicePixelRatio || 1;
+                            const lw = canvas.width / dpr, lh = canvas.height / dpr;
 
                             const mView = window.ENGINE.MathOps.mat4.create();
                             window.ENGINE.Camera.updateViewMatrix(mView, state.camera, state.config);
@@ -160,8 +163,8 @@ window.ENGINE.Controls = {
                             const fovScale = state.config.fov * 13.33;
                             if (mode === 'TRANSLATE') {
                                 if (axis === 'xyz') {
-                                    const tx = (mx - canvas.width * 0.5) * (-dragStartViewZ) / fovScale;
-                                    const ty = -(my - canvas.height * 0.5) * (-dragStartViewZ) / fovScale;
+                                    const tx = (mx - lw * 0.5) * (-dragStartViewZ) / fovScale;
+                                    const ty = -(my - lh * 0.5) * (-dragStartViewZ) / fovScale;
                                     const invView = window.ENGINE.MathOps.mat4.create();
                                     if (window.ENGINE.MathOps.mat4.invert(invView, mView)) {
                                         const tWorld = [0, 0, 0, 1];
@@ -172,8 +175,8 @@ window.ENGINE.Controls = {
                                     }
                                 } else if (axis === 'x' || axis === 'y' || axis === 'z') {
                                     const dir = window.ENGINE.GizmoRenderer.getAxisDirection(axis, obj.rot);
-                                    const p0 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x, obj.pos.y, obj.pos.z], mView, canvas.width, canvas.height, fovScale);
-                                    const p1 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + dir[0], obj.pos.y + dir[1], obj.pos.z + dir[2]], mView, canvas.width, canvas.height, fovScale);
+                                    const p0 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x, obj.pos.y, obj.pos.z], mView, lw, lh, fovScale);
+                                    const p1 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + dir[0], obj.pos.y + dir[1], obj.pos.z + dir[2]], mView, lw, lh, fovScale);
                                     if (p0 && p1) {
                                         const vAxis = { x: p1.x - p0.x, y: p1.y - p0.y };
                                         const magSq = vAxis.x * vAxis.x + vAxis.y * vAxis.y;
@@ -182,9 +185,9 @@ window.ENGINE.Controls = {
                                 } else if (axis === 'xy' || axis === 'xz' || axis === 'yz') {
                                     const dir1 = window.ENGINE.GizmoRenderer.getAxisDirection(axis[0], obj.rot);
                                     const dir2 = window.ENGINE.GizmoRenderer.getAxisDirection(axis[1], obj.rot);
-                                    const p0 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x, obj.pos.y, obj.pos.z], mView, canvas.width, canvas.height, fovScale);
-                                    const p1 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + dir1[0], obj.pos.y + dir1[1], obj.pos.z + dir1[2]], mView, canvas.width, canvas.height, fovScale);
-                                    const p2 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + dir2[0], obj.pos.y + dir2[1], obj.pos.z + dir2[2]], mView, canvas.width, canvas.height, fovScale);
+                                    const p0 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x, obj.pos.y, obj.pos.z], mView, lw, lh, fovScale);
+                                    const p1 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + dir1[0], obj.pos.y + dir1[1], obj.pos.z + dir1[2]], mView, lw, lh, fovScale);
+                                    const p2 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + dir2[0], obj.pos.y + dir2[1], obj.pos.z + dir2[2]], mView, lw, lh, fovScale);
                                     if (p0 && p1 && p2) {
                                         const s1 = { x: p1.x - p0.x, y: p1.y - p0.y }, s2 = { x: p2.x - p0.x, y: p2.y - p0.y };
                                         const det = s1.x * s2.y - s1.y * s2.x;
