@@ -12,16 +12,19 @@ window.ENGINE.Gizmo = (function () {
         const canvas = document.getElementById('game');
 
         const updateUI = (mode) => {
+            if (!mode) return;
+            const targetMode = mode.toLowerCase();
+
             // Update Island buttons
             if (island) {
                 island.querySelectorAll('.gizmo-btn').forEach(b => {
-                    b.classList.toggle('active', b.dataset.mode === mode);
+                    b.classList.toggle('active', b.dataset.mode?.toLowerCase() === targetMode);
                 });
             }
             // Update Viewport Selector buttons
             if (vpSelector) {
                 vpSelector.querySelectorAll('.vp-btn[data-mode]').forEach(b => {
-                    b.classList.toggle('active', b.dataset.mode === mode);
+                    b.classList.toggle('active', b.dataset.mode?.toLowerCase() === targetMode);
                 });
             }
         };
@@ -49,32 +52,14 @@ window.ENGINE.Gizmo = (function () {
         // Mode persistence: DO NOT auto-reset to SELECT on canvas click.
         // User must explicitly click a mode button to change modes.
 
-        // Coordinate Space Toggle (L/G/S)
-        const spaceButtons = document.querySelectorAll('.space-btn');
-        const updateSpaceUI = (space) => {
-            spaceButtons.forEach(b => {
-                b.classList.toggle('active', b.dataset.space === space);
-            });
-        };
-
-        spaceButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const space = btn.dataset.space;
-                store.dispatch({ type: 'SET_TRANSFORM_SPACE', payload: space });
-                e.stopPropagation();
-            });
-        });
-
         // Sync with State
         store.subscribe(() => {
             const state = store.getState();
             updateUI(state.ui.transformMode);
-            updateSpaceUI(state.ui.transformSpace);
         });
 
         // Initial sync
         updateUI(store.getState().ui.transformMode);
-        updateSpaceUI(store.getState().ui.transformSpace);
     }
 
     return { init };

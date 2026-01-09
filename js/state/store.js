@@ -23,7 +23,7 @@ window.ENGINE = window.ENGINE || {};
             velY: 0,
             panVelX: 0,
             panVelY: 0,
-            damping: 0.95, // Friction (0.95 = 5% drag per frame)
+            damping: 0.98, // Professional Friction (0.98 = 2% drag per frame)
             mass: 1.0
         },
         object: {
@@ -44,17 +44,17 @@ window.ENGINE = window.ENGINE || {};
             showDiagonals: false, // Default: Clean Wireframe
             showHUD: true,
             viewMode: 'SHADED_WIRE',
-            fov: 1.5
+            fov: 45
         },
         ui: {
             isSidebarCollapsed: false,
             transformMode: 'SELECT',
-            transformSpace: 'GLOBAL', // 'LOCAL', 'GLOBAL', 'SCREEN'
             currentPrimitive: 'pyramid',
             selectedObjectId: null, // Only set when user clicks to select
             hoveredObjectId: null, // Object being hovered (for outline)
             dragAxis: null, // 'x', 'y', 'z', or null
             hoveredAxis: null, // 'x', 'y', 'z', or null (for visual feedback)
+            hoveredFrontArrow: false, // For "Front Direction" hover text
             info: { verts: 0, faces: 0 },
             stats: { fps: 0, mem: 0 }
         }
@@ -172,8 +172,10 @@ window.ENGINE = window.ENGINE || {};
             case 'SET_HOVERED_AXIS':
                 return { ...state, ui: { ...state.ui, hoveredAxis: action.payload } };
 
-            case 'SET_TRANSFORM_SPACE':
-                return { ...state, ui: { ...state.ui, transformSpace: action.payload } };
+            case 'SET_HOVERED_FRONT_ARROW':
+                return { ...state, ui: { ...state.ui, hoveredFrontArrow: action.payload } };
+
+
 
             case 'SET_HOVERED_OBJECT':
                 return { ...state, ui: { ...state.ui, hoveredObjectId: action.payload } };

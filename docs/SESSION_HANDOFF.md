@@ -150,3 +150,23 @@ Implemented a robust, industry-standard 3D Translation Gizmo that operates purel
 - **Rotation Gizmo**: Implement interactive rings for 3-axis rotation.
 - **Scale Gizmo**: Implement axis-aligned scaling handles.
 - **Snap-to-Grid**: Add grid snapping logic for translation.
++
++---
++
++# CHECKPOINT UPDATE (Mathematical Refinement & Matrix Basis) 📐
++**Session ID:** 977f6436
++**Date:** 2025-12-28
++
++## 1. Matrix Row-Basis Projection
++Neutralized the "Swapped Axis" and "Inverted Movement" bugs in the Free Translation (Center) handle.
++- **The Failure**: Manual trigonometric vector derivation was drift-prone and incomplete for Z-Up manifold rotations.
++- **The Solution**: Switched to **Row-Basis Extraction** from the View Matrix.
++    - **Row 0**: Absolute world vector for Screen-Right.
++    - **Row 1**: Absolute world vector for Screen-Up.
++- **Result**: Clicking the center handle now makes the object follow the mouse perfectly across all 3 axes, relative to the current camera perspective.
++
++## 2. Adaptive Interaction Speed
++- Implemented `zoom`-aware translation scaling. Move speed now adapts to distance, ensuring consistent tactile feel at `zoom: 2` and `zoom: 20`.
++
++## 3. Documentation Alignment
++- Updated `system.md` and `ROADMAP.md` to reflect the transition from primitive trig to matrix-basis logic.

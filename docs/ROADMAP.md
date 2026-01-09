@@ -20,12 +20,16 @@ MrVee, we have transformed the engine from a terrestrial script into a high-octa
 ### **The "Novel" Renderer (Final BEAUTY FX)**
 *   **ASCII Overlay**: Injecting the character-based luminance mapping.
 *   **Crosshatched Shadows**: Designing the GLSL logic to replace standard gradients with digital cross-hatching.
+*   **Advanced Lighting Manifold**: Implementation of Screen-Space Shadows and Ambient Occlusion (AO) to transcend the current Dot-Product limitation.
 
-### **Hardware Optimizations**
+### **Hardware & Logic Optimizations**
+*   **Quaternion Camera Manifold**: Transition from Euler angles (X/Y/Z) to a high-fidelity Quaternion orientation system to permanently eradicate Gimbal Lock.
+*   **Worker-Based Radix Sort**: Offloading O(N) face sorting to the geometry worker to eliminate UI stutter on high-poly models (1M+ faces).
 *   **Static Buffer Optimization**: Move to Static VBOs with Uniform Matrices for 144+ FPS performance (eliminated per-frame BUS upload).
 *   **Nanite-Level Mesh Optimization**: Implement **Coplanar Merging** (Greedy Meshing) in `optimizer.js` to reduce polycounts on flat surfaces.
 
 ### **System Architecture**
+*   **UV & Material Subsystem**: Integrating UV coordinate support and texture buffers for multi-layered surface manifestation.
 *   **The Scene Graph (Outliner)**: Moving from "One Model" to a Multi-Object Workspace with hierarchical parent-child transforms.
 *   **Binary Streaming**: Adding direct **GLB/glTF** binary support for ultra-fast data ingestion.
 

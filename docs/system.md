@@ -254,8 +254,9 @@ To maintain the "Software Renderer" philosophy, we avoid heavy Raycasting. Inter
 Movement is calculated by projecting mouse deltas onto 3D vectors.
 - **Single Axis (X/Y/Z)**: Dot product of Mouse Delta vector and Projected Axis vector.
 - **Planar (XY/XZ/YZ)**: Direct mapping of horizontal/vertical mouse movement to the plane's two axes.
-- **Free Move (Center)**: True **Screen-Space Panning** using Camera Right/Up vectors derived from Azimuth (`orbitY`) and Elevation (`orbitX`).
-  - *Formula*: `Pos += CameraRight * dx - CameraUp * dy`
+- **Free Move (Center)**: True **Screen-Space Panning** via **Row-Basis Basis Projection**. We extract the world-space camera basis vectors directly from the View Matrix rows.
+  - *Logic*: Row 0 = Screen Right, Row 1 = Screen Up.
+  - *Formula*: `Pos += Row0 * dx - Row1 * dy` (where dy is inverted for screen-to-world parity).
 
 ### C. Coordinate Spaces
 - **Global**: Axes align with World (0,0,0).

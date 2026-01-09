@@ -8,6 +8,10 @@ window.ENGINE.GL = (function () {
     let program = null;
     let vbo = null;
     let ebo = null;
+    let edgeEbo = null;
+
+    let locations = {};
+    let currentGeometryId = null;
 
     const vsSource = `
         attribute vec3 aPosition;
@@ -83,6 +87,20 @@ window.ENGINE.GL = (function () {
 
         vbo = gl.createBuffer();
         ebo = gl.createBuffer();
+        edgeEbo = gl.createBuffer();
+
+        // Cache Locations globally
+        locations = {
+            aPos: gl.getAttribLocation(program, "aPosition"),
+            uMV: gl.getUniformLocation(program, "uModelView"),
+            uPJ: gl.getUniformLocation(program, "uProjection"),
+            uPoly: gl.getUniformLocation(program, "uPolyColor"),
+            uFog: gl.getUniformLocation(program, "uFogColor"),
+            uTime: gl.getUniformLocation(program, "uTime"),
+            uVM: gl.getUniformLocation(program, "uViewMode"),
+            uNear: gl.getUniformLocation(program, "uNear"),
+            uFar: gl.getUniformLocation(program, "uFar")
+        };
 
         return true;
     }
@@ -106,49 +124,90 @@ window.ENGINE.GL = (function () {
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.error(gl.getShaderInfoLog(shader));
+            console.error("Shader Compilation Failed:", gl.getShaderInfoLog(shader));
         }
         return shader;
     }
 
-    function render(vertices, indices, modelView, projection, config) {
-        if (!gl) return;
+    function render(vertices, indices, modelView, projection, config, forceDirty = false) {
+        if (!gl || !locations.aPos) return;
 
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         gl.useProgram(program);
 
-        const uMV = gl.getUniformLocation(program, "uModelView");
-        const uPJ = gl.getUniformLocation(program, "uProjection");
-        const uPoly = gl.getUniformLocation(program, "uPolyColor");
-        const uFog = gl.getUniformLocation(program, "uFogColor");
-        const uTime = gl.getUniformLocation(program, "uTime");
-        const uVM = gl.getUniformLocation(program, "uViewMode");
-        const uNear = gl.getUniformLocation(program, "uNear");
-        const uFar = gl.getUniformLocation(program, "uFar");
-
-        gl.uniformMatrix4fv(uMV, false, modelView);
-        gl.uniformMatrix4fv(uPJ, false, projection);
+        gl.uniformMatrix4fv(locations.uMV, false, modelView);
+        gl.uniformMatrix4fv(locations.uPJ, false, projection);
 
         const c = config.polyColor || "#1a1a1a";
-        gl.uniform3f(uPoly, parseInt(c.slice(1, 3), 16) / 255, parseInt(c.slice(3, 5), 16) / 255, parseInt(c.slice(5, 7), 16) / 255);
-        gl.uniform3f(uFog, 0.04, 0.04, 0.04);
-        gl.uniform1f(uTime, performance.now() / 1000);
-        gl.uniform1f(uVM, config.viewMode === 'BEAUTY' ? 1.0 : 0.0);
-        gl.uniform1f(uNear, 2.0);
-        gl.uniform1f(uFar, 50.0);
+        gl.uniform3f(locations.uPoly, parseInt(c.slice(1, 3), 16) / 255, parseInt(c.slice(3, 5), 16) / 255, parseInt(c.slice(5, 7), 16) / 255);
+        gl.uniform3f(locations.uFog, 0.04, 0.04, 0.04);
+        gl.uniform1f(locations.uTime, performance.now() / 1000);
+        gl.uniform1f(locations.uVM, config.viewMode === 'BEAUTY' ? 1.0 : 0.0);
+        gl.uniform1f(locations.uNear, 2.0);
+        gl.uniform1f(locations.uFar, 50.0);
 
-        const aPos = gl.getAttribLocation(program, "aPosition");
         gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.DYNAMIC_DRAW);
-        gl.enableVertexAttribArray(aPos);
-        gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.DYNAMIC_DRAW);
+        // PERSISTENT BUFFER STRATEGY
+        const geomId = vertices.length + "_" + indices.length;
+        const vboHud = document.getElementById('hud-vbo');
 
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_INT, 0);
+        if (geomId !== currentGeometryId || forceDirty) {
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+            // Generate Edges for Wireframe (Efficient Pass)
+            if (config.viewMode !== 'POINTS') {
+                const edges = new Uint32Array(indices.length * 2);
+                let edgePtr = 0;
+                for (let i = 0; i < indices.length; i += 3) {
+                    const a = indices[i], b = indices[i + 1], c = indices[i + 2];
+                    edges[edgePtr++] = a; edges[edgePtr++] = b;
+                    edges[edgePtr++] = b; edges[edgePtr++] = c;
+                    edges[edgePtr++] = c; edges[edgePtr++] = a;
+                }
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, edgeEbo);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, edges, gl.STATIC_DRAW);
+            }
+
+            currentGeometryId = geomId;
+            if (vboHud) {
+                vboHud.textContent = "UPLOAD";
+                vboHud.style.color = "#ff3e3e";
+                setTimeout(() => {
+                    if (vboHud.textContent === "UPLOAD") {
+                        vboHud.textContent = "CACHED";
+                        vboHud.style.color = "#00ffd2";
+                    }
+                }, 100);
+            }
+            console.log("VEETANCE GL: Persistent Manifold Updated.");
+        } else {
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
+            if (vboHud && vboHud.textContent !== "CACHED") {
+                vboHud.textContent = "CACHED";
+                vboHud.style.color = "#00ffd2";
+            }
+        }
+
+        gl.enableVertexAttribArray(locations.aPos);
+        gl.vertexAttribPointer(locations.aPos, 3, gl.FLOAT, false, 0, 0);
+
+        // PASS 1: Shared Faces
+        if (config.viewMode !== 'WIRE') {
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
+            gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_INT, 0);
+        }
+
+        // PASS 2: Efficient Wireframes (No Unrolling)
+        if (config.viewMode === 'WIRE' || config.viewMode === 'SHADED_WIRE') {
+            gl.uniform3f(locations.uPoly, 0.0, 1.0, 0.82); // Cyan/Mint contrast
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, edgeEbo);
+            gl.drawElements(gl.LINES, indices.length * 2, gl.UNSIGNED_INT, 0);
+        }
     }
 
     return { init, render };

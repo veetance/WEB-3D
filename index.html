@@ -131,12 +131,7 @@
                 <span class="material-symbols-outlined">fullscreen</span>
                 <span class="btn-label">Scale</span>
             </button>
-            <div class="gizmo-divider"></div>
-            <div class="space-toggle">
-                <button class="space-btn" data-space="LOCAL" title="Local Space">L</button>
-                <button class="space-btn active" data-space="GLOBAL" title="Global Space">G</button>
-                <button class="space-btn" data-space="SCREEN" title="Screen Space">S</button>
-            </div>
+
         </div>
 
         <!-- Viewport Toggles (Top Left) -->
@@ -200,8 +195,7 @@
         </div>
 
         <canvas id="game"></canvas>
-        <canvas id="bio-overlay"
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: none;"></canvas>
+        <canvas id="bio-overlay"></canvas>
         <div id="infobar">
             Verts:<span id="vertCount">0</span> |
             Faces:<span id="faceCount">0</span> |
@@ -231,7 +225,16 @@
                     style="flex-grow: 1; border-bottom: 1px dotted rgba(179, 247, 237, 0.1); margin: 0 8px; position: relative; top: -3px;"></span>
                 <span id="hud-cpu" style="color: #b3f7ed;">LOW</span>
             </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <span style="opacity: 0.3; color: #ffbe3e;">VBO</span>
+                <span
+                    style="flex-grow: 1; border-bottom: 1px dotted rgba(255, 190, 62, 0.1); margin: 0 8px; position: relative; top: -3px;"></span>
+                <span id="hud-vbo" style="color: #ffbe3e;">READY</span>
+            </div>
         </div>
+        <!-- Error Log (Centralized Diagnostics) -->
+        <div id="error-log"></div>
+
         <div id="loading-overlay" class="hidden">
             <div class="loader-content">
                 <div class="spinner"></div>
@@ -304,6 +307,11 @@
     <script src="js/io/streaming.js?v=3"></script>
     <script src="js/io/transfer.js?v=3"></script>
     <script src="js/interaction/controls.js?v=3"></script>
+    <script src="js/core/gizmo/gizmo-utils.js?v=3"></script>
+    <script src="js/core/gizmo/gizmo-translate.js?v=3"></script>
+    <script src="js/core/gizmo/gizmo-rotate.js?v=3"></script>
+    <script src="js/core/gizmo/gizmo-scale.js?v=3"></script>
+    <script src="js/core/gizmo/gizmo-outlines.js?v=3"></script>
     <script src="js/core/gizmoRenderer.js?v=3"></script>
     <script src="js/core/gizmoHitTest.js?v=3"></script>
     <script src="js/core/engine.js?v=3"></script>

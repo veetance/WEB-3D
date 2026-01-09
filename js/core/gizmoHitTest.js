@@ -75,23 +75,45 @@ window.ENGINE.GizmoHitTest = (function () {
     }
 
     /**
-     * Test rotate gizmo hit zones (rings).
+     * Test rotate gizmo hit zones (prioritized).
      */
     function testRotate(mx, my, hitZones) {
-        let closest = null;
-        let minDiff = HIT_THRESHOLD;
+        if (!hitZones || hitZones.length === 0) return null;
 
+        let outer = null, rings = [], trackball = null;
         for (const zone of hitZones) {
-            // Distance from center
-            const dist = Math.sqrt((mx - zone.cx) ** 2 + (my - zone.cy) ** 2);
-            // How close to the ring radius
-            const diff = Math.abs(dist - zone.r);
-            if (diff < minDiff) {
-                minDiff = diff;
-                closest = zone.axis;
-            }
+            if (zone.axis === 'screen') outer = zone;
+            else if (zone.axis === 'trackball') trackball = zone;
+            else rings.push(zone);
         }
-        return closest;
+
+        const cx = hitZones[0].cx || mx, cy = hitZones[0].cy || my; // fallback
+        const dist = Math.sqrt((mx - cx) ** 2 + (my - cy) ** 2);
+
+        // 1. Outer Screen Ring (Roll) - thin band
+        if (outer && Math.abs(dist - outer.r) < HIT_THRESHOLD) return 'screen';
+
+        // 2. Axis Rings - precision check against projected polyline
+        let closestRing = null;
+        let minRingDist = HIT_THRESHOLD;
+
+        rings.forEach(ring => {
+            if (!ring.points) return;
+            for (let i = 0; i < ring.points.length - 1; i++) {
+                const p1 = ring.points[i], p2 = ring.points[i + 1];
+                const d = pointToLineDistance(mx, my, p1.x, p1.y, p2.x, p2.y);
+                if (d < minRingDist) {
+                    minRingDist = d;
+                    closestRing = ring.axis;
+                }
+            }
+        });
+        if (closestRing) return closestRing;
+
+        // 3. Trackball - anywhere inside the rings
+        if (trackball && dist < trackball.r) return 'trackball';
+
+        return null;
     }
 
     /**
@@ -116,7 +138,7 @@ window.ENGINE.GizmoHitTest = (function () {
         mode = mode.toUpperCase();
         if (mode === 'TRANSLATE') return testTranslate(mx, my, hitZones);
         if (mode === 'ROTATE') return testRotate(mx, my, hitZones);
-        if (mode === 'SCALE') return testScale(mx, my, hitZomes);
+        if (mode === 'SCALE') return testScale(mx, my, hitZones);
         return null;
     }
 

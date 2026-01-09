@@ -30,8 +30,9 @@ window.ENGINE.Renderer = (function () {
         }
     };
 
-    // --- Legacy 2D Drawing Helpers (used by engine.js CPU path) ---
+    // --- Legacy 2D Drawing Helpers (used by engine.js CPU path and Overlay) ---
     const clear = (ctx, width, height, color) => {
+        if (!(ctx instanceof CanvasRenderingContext2D)) return;
         if (color === 'transparent') {
             ctx.clearRect(0, 0, width, height);
         } else {
@@ -41,6 +42,7 @@ window.ENGINE.Renderer = (function () {
     };
 
     const fillPolygon = (ctx, points, color) => {
+        if (!(ctx instanceof CanvasRenderingContext2D)) return;
         if (points.length < 3) return;
         ctx.fillStyle = color;
         ctx.beginPath();
@@ -53,6 +55,7 @@ window.ENGINE.Renderer = (function () {
     };
 
     const strokePolygon = (ctx, points, color, thickness = 1) => {
+        if (!(ctx instanceof CanvasRenderingContext2D)) return;
         if (points.length < 2) return;
         ctx.strokeStyle = color;
         ctx.lineWidth = thickness;
@@ -68,6 +71,7 @@ window.ENGINE.Renderer = (function () {
     };
 
     const line = (ctx, p1, p2, color, thickness = 1) => {
+        if (!(ctx instanceof CanvasRenderingContext2D)) return;
         ctx.strokeStyle = color;
         ctx.lineWidth = thickness;
         ctx.lineCap = 'round';
@@ -78,6 +82,7 @@ window.ENGINE.Renderer = (function () {
     };
 
     const point = (ctx, p, color, size = 1) => {
+        if (!(ctx instanceof CanvasRenderingContext2D)) return;
         ctx.fillStyle = color;
         ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
     };

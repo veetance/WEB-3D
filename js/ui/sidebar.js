@@ -31,18 +31,40 @@ window.ENGINE.Sidebar = (function () {
             const hw = btn.dataset.hw;
 
             if (mode) {
-                document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
                 store.dispatch({ type: 'SET_TRANSFORM_MODE', payload: mode });
             } else if (view) {
-                document.querySelectorAll('.mode-btn[data-view]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
                 store.dispatch({ type: 'SET_VIEW_MODE', payload: view });
             } else if (hw) {
-                document.querySelectorAll('.mode-btn[data-hw]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
                 store.dispatch({ type: 'UPDATE_CONFIG', payload: { hardwareMode: hw } });
             }
+        });
+
+        // REACTIVE UI SYNC: Subscribe to Store to update button 'active' states
+        store.subscribe((state) => {
+            // Update Transform Mode Buttons
+            const mode = state.ui.transformMode;
+            document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+
+            // Update View Mode Buttons
+            const view = state.config.viewMode;
+            document.querySelectorAll('.mode-btn[data-view]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === view);
+            });
+
+            // Update Hardware Mode Buttons
+            const hw = state.config.hardwareMode;
+            document.querySelectorAll('.mode-btn[data-hw]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.hw === hw);
+            });
+
+            // Sync Checkboxes
+            const diagCheck = document.getElementById('show-diagonals');
+            if (diagCheck) diagCheck.checked = state.config.showDiagonals;
+
+            const gridCheck = document.getElementById('show-grid');
+            if (gridCheck) gridCheck.checked = state.config.showGrid;
         });
 
         const diagCheck = document.getElementById('show-diagonals');
