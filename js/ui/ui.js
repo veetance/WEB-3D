@@ -18,7 +18,7 @@ window.ENGINE.UI = {
             if (el) el.addEventListener(event, (e) => store.dispatch({ type: actionType, payload: payloadFn(e) }));
         };
 
-        bind('thickness', 'input', 'UPDATE_CONFIG', e => ({ thickness: parseFloat(e.target.value) }));
+        bind('wireDensity', 'input', 'UPDATE_CONFIG', e => ({ wireDensity: parseFloat(e.target.value) / 100 }));
         bind('auto', 'change', 'UPDATE_CONFIG', e => ({ auto: e.target.checked }));
         bind('show-grid', 'change', 'UPDATE_CONFIG', e => ({ showGrid: e.target.checked }));
         bind('show-ui', 'change', 'UPDATE_CONFIG', e => ({ showHUD: e.target.checked }));

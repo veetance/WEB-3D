@@ -162,6 +162,7 @@ window.ENGINE.Core = (function () {
             const isWire = config.viewMode === 'WIRE';
             let validFaces = 0;
             const clusters = object.clusters;
+            const clusterVisibility = clusters ? new Uint8Array(clusters.length) : null;
 
             if (clusters) {
                 for (let c = 0; c < clusters.length; c++) {
@@ -169,25 +170,25 @@ window.ENGINE.Core = (function () {
                     const [cx, cy, cz, radius] = cluster.sphere;
 
                     // 1. Cluster Culling (Sphere-Frustum)
-                    // Transform center to clip space
                     const cp = [cx, cy, cz, 1.0];
                     MathOps.mat4.transformVec4(cp, mTotal, cp);
                     const w = cp[3];
                     const rScale = fovScale / (w || 1);
                     const screenR = radius * rScale;
 
-                    // Very aggressive screen-space frustum cull
+                    // Aggressive screen-space frustum cull
                     if (w < -radius) continue; // Behind camera
                     if (Math.abs(cp[0] / w) > 1.2 && Math.abs(cp[0]) > screenR) continue;
                     if (Math.abs(cp[1] / w) > 1.2 && Math.abs(cp[1]) > screenR) continue;
+
+                    // Mark cluster as visible
+                    clusterVisibility[c] = 1;
 
                     // 2. Process triangles in visible cluster
                     for (let j = 0; j < cluster.faceCount; j++) {
                         const i = cluster.startFace + j;
                         const i3 = i * 3, i0 = indices[i3], i1 = indices[i3 + 1], i2 = indices[i3 + 2], i04 = i0 << 2, i14 = i1 << 2, i24 = i2 << 2;
 
-                        // Already projected in TransformBuffer if vCount was full, 
-                        // but here we only check screen coords from buffers.screen
                         if (screen[i04 + 3] < 0 || screen[i14 + 3] < 0 || screen[i24 + 3] < 0) continue;
 
                         const area = (screen[i14] - screen[i04]) * (screen[i24 + 1] - screen[i04 + 1]) - (screen[i14 + 1] - screen[i04 + 1]) * (screen[i24] - screen[i04]);
@@ -228,16 +229,13 @@ window.ENGINE.Core = (function () {
 
                 if (isPixelPath) {
                     RP.clearHW(canvas.width, canvas.height);
-                    // Standard sort is descending for Painter's (Far to Near). 
-                    // To optimize Z-Buffer, we want Near to Far (Front-to-Back).
-                    // So we iterate the sorted array in REVERSE for the pixel path.
                     RP.render(mainCtx, screen, indices, intensities, sorted, validFaces, config, canvas.width, canvas.height, true);
                     RP.flush(mainCtx, canvas.width, canvas.height);
                 }
 
-                // Still call drawFaces for Wireframe/Overlay elements if needed
+                // Pass cluster visibility to wireframe renderer
                 if (config.viewMode !== 'SOLID') {
-                    Rasterizer.drawFaces(mainCtx, buffers, sorted, indices, validFaces, config, object.edges);
+                    Rasterizer.drawFaces(mainCtx, buffers, sorted, indices, validFaces, config, object.edges, clusters, clusterVisibility);
                 }
             }
         }

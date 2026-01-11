@@ -44,6 +44,7 @@ window.ENGINE = window.ENGINE || {};
             showGrid: true,
             showDiagonals: false, // Default: Clean Wireframe
             showHUD: true,
+            wireDensity: 0.5, // Sparse Wireframe: 50% pixel density (every other pixel)
             viewMode: 'SHADED_WIRE',
             fov: 45,
             pointBudget: 20000
