@@ -60,16 +60,26 @@ window.ENGINE.UI = {
             });
         }
 
-        // GPU/CPU hardware switcher
-        const hwButtons = document.querySelectorAll('.mode-btn[data-hw]');
-        hwButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const mode = btn.dataset.hw.toUpperCase();
-                window.ENGINE.Renderer.setMode(mode);
-                window.ENGINE.Renderer.init(document.getElementById('game'));
-                // Update active class UI
-                hwButtons.forEach(b => b.classList.toggle('active', b === btn));
+
+
+        // Point Budget Scroll Control
+        const pointContainer = document.querySelector('.point-cloud-container');
+        const pointSlider = document.getElementById('point-budget');
+        if (pointContainer && pointSlider) {
+            pointContainer.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const step = 2000;
+                const direction = e.deltaY > 0 ? -1 : 1;
+                let newValue = parseInt(pointSlider.value) + (direction * step);
+                newValue = Math.max(parseInt(pointSlider.min), Math.min(parseInt(pointSlider.max), newValue));
+
+                pointSlider.value = newValue;
+                store.dispatch({ type: 'UPDATE_CONFIG', payload: { pointBudget: newValue } });
+            }, { passive: false });
+
+            pointSlider.addEventListener('input', (e) => {
+                store.dispatch({ type: 'UPDATE_CONFIG', payload: { pointBudget: parseInt(e.target.value) } });
             });
-        });
+        }
     }
 };

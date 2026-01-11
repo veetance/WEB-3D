@@ -30,21 +30,23 @@ window.ENGINE = window.ENGINE || {};
             pos: { x: 0, y: 0, z: 0 },
             rot: { x: 0, y: 0, z: 0 },
             scl: { x: 1, y: 1, z: 1 },
-            edges: null
+            edges: null,
+            clusters: null
         },
         config: {
             zOffset: 0,
             thickness: 1,
             fg: '#00ffd2',
-            polyColor: '#1a1a1a',
-            hardwareMode: 'GPU', // 'GPU' or 'CPU'
+            polyColor: '#474747',
+            hardwareMode: 'CPU', // PURE SOFTWARE RENDERER
             bg: '#0a0a0a',
             auto: false,
             showGrid: true,
             showDiagonals: false, // Default: Clean Wireframe
             showHUD: true,
             viewMode: 'SHADED_WIRE',
-            fov: 45
+            fov: 45,
+            pointBudget: 20000
         },
         ui: {
             isSidebarCollapsed: false,
@@ -56,6 +58,7 @@ window.ENGINE = window.ENGINE || {};
             hoveredAxis: null, // 'x', 'y', 'z', or null (for visual feedback)
             hoveredFrontArrow: false, // For "Front Direction" hover text
             info: { verts: 0, faces: 0 },
+            centroid: { x: 0, y: 0, z: 0 },
             stats: { fps: 0, mem: 0 }
         }
     };
@@ -124,11 +127,13 @@ window.ENGINE = window.ENGINE || {};
                     indices: data.indices,
                     object: {
                         ...state.object,
-                        edges: data.edges || null // Inject Edges
+                        edges: data.edges || null,
+                        clusters: action.payload.clusters || window.ENGINE.Optimizer.buildClusters(data.vertices, data.indices, 128)
                     },
                     ui: {
                         ...state.ui,
                         currentPrimitive: action.payload,
+                        centroid: action.payload.centroid || window.ENGINE.MathOps.computeCentroid(data.vertices),
                         info: {
                             verts: data.vertices.length / 3,
                             faces: data.indices.length / 3
@@ -138,20 +143,34 @@ window.ENGINE = window.ENGINE || {};
             }
 
             case 'SET_MODEL': {
+                const fCount = action.payload.indices.length / 3;
+                let viewMode = state.config.viewMode;
+
+                // Auto Point Cloud for high-poly models
+                if (fCount > 50000) viewMode = 'POINTS';
+
                 return {
                     ...state,
                     vertices: action.payload.vertices,
                     indices: action.payload.indices,
+                    config: {
+                        ...state.config,
+                        viewMode
+                    },
                     object: {
                         ...state.object,
-                        edges: null // PURGE GHOST EDGES
+                        edges: null, // PURGE GHOST EDGES
+                        clusters: action.payload.clusters || window.ENGINE.Optimizer.buildClusters(action.payload.vertices, action.payload.indices, 128)
                     },
                     ui: {
                         ...state.ui,
                         currentPrimitive: action.payload.name || 'EXTERNAL',
+                        selectedObjectId: null, // CLEAR STALE SELECTION
+                        hoveredObjectId: null,  // CLEAR STALE HOVER
+                        centroid: action.payload.centroid || window.ENGINE.MathOps.computeCentroid(action.payload.vertices),
                         info: {
                             verts: action.payload.vertices.length / 3,
-                            faces: action.payload.indices.length / 3
+                            faces: fCount
                         }
                     }
                 };

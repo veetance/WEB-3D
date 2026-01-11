@@ -154,8 +154,9 @@ window.ENGINE.Controls = {
 
                             const mView = window.ENGINE.MathOps.mat4.create();
                             window.ENGINE.Camera.updateViewMatrix(mView, state.camera, state.config);
+                            const cen = state.ui.centroid;
                             const pView = [0, 0, 0, 1];
-                            const pWorld = [obj.pos.x, obj.pos.y, obj.pos.z, 1];
+                            const pWorld = [obj.pos.x + cen.x, obj.pos.y + cen.y, obj.pos.z + cen.z, 1];
                             window.ENGINE.MathOps.mat4.transformVec4(pView, mView, pWorld);
                             dragStartViewZ = pView[2];
 
@@ -169,14 +170,14 @@ window.ENGINE.Controls = {
                                     if (window.ENGINE.MathOps.mat4.invert(invView, mView)) {
                                         const tWorld = [0, 0, 0, 1];
                                         window.ENGINE.MathOps.mat4.transformVec4(tWorld, invView, [tx, ty, dragStartViewZ, 1]);
-                                        dragStartOffset.x = tWorld[0] - obj.pos.x;
-                                        dragStartOffset.y = tWorld[1] - obj.pos.y;
-                                        dragStartOffset.z = tWorld[2] - obj.pos.z;
+                                        dragStartOffset.x = tWorld[0] - (obj.pos.x + cen.x);
+                                        dragStartOffset.y = tWorld[1] - (obj.pos.y + cen.y);
+                                        dragStartOffset.z = tWorld[2] - (obj.pos.z + cen.z);
                                     }
                                 } else if (axis === 'x' || axis === 'y' || axis === 'z') {
                                     const dir = window.ENGINE.GizmoRenderer.getAxisDirection(axis, obj.rot);
-                                    const p0 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x, obj.pos.y, obj.pos.z], mView, lw, lh, fovScale);
-                                    const p1 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + dir[0], obj.pos.y + dir[1], obj.pos.z + dir[2]], mView, lw, lh, fovScale);
+                                    const p0 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + cen.x, obj.pos.y + cen.y, obj.pos.z + cen.z], mView, lw, lh, fovScale);
+                                    const p1 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + cen.x + dir[0], obj.pos.y + cen.y + dir[1], obj.pos.z + cen.z + dir[2]], mView, lw, lh, fovScale);
                                     if (p0 && p1) {
                                         const vAxis = { x: p1.x - p0.x, y: p1.y - p0.y };
                                         const magSq = vAxis.x * vAxis.x + vAxis.y * vAxis.y;
@@ -185,9 +186,9 @@ window.ENGINE.Controls = {
                                 } else if (axis === 'xy' || axis === 'xz' || axis === 'yz') {
                                     const dir1 = window.ENGINE.GizmoRenderer.getAxisDirection(axis[0], obj.rot);
                                     const dir2 = window.ENGINE.GizmoRenderer.getAxisDirection(axis[1], obj.rot);
-                                    const p0 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x, obj.pos.y, obj.pos.z], mView, lw, lh, fovScale);
-                                    const p1 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + dir1[0], obj.pos.y + dir1[1], obj.pos.z + dir1[2]], mView, lw, lh, fovScale);
-                                    const p2 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + dir2[0], obj.pos.y + dir2[1], obj.pos.z + dir2[2]], mView, lw, lh, fovScale);
+                                    const p0 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + cen.x, obj.pos.y + cen.y, obj.pos.z + cen.z], mView, lw, lh, fovScale);
+                                    const p1 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + cen.x + dir1[0], obj.pos.y + cen.y + dir1[1], obj.pos.z + cen.z + dir1[2]], mView, lw, lh, fovScale);
+                                    const p2 = window.ENGINE.GizmoRenderer.projectPoint([obj.pos.x + cen.x + dir2[0], obj.pos.y + cen.y + dir2[1], obj.pos.z + cen.z + dir2[2]], mView, lw, lh, fovScale);
                                     if (p0 && p1 && p2) {
                                         const s1 = { x: p1.x - p0.x, y: p1.y - p0.y }, s2 = { x: p2.x - p0.x, y: p2.y - p0.y };
                                         const det = s1.x * s2.y - s1.y * s2.x;
@@ -326,15 +327,17 @@ window.ENGINE.Controls = {
                         const targetWorldPos = [0, 0, 0, 1];
                         window.ENGINE.MathOps.mat4.transformVec4(targetWorldPos, invView, [targetViewX, targetViewY, dragStartViewZ, 1]);
 
-                        // Apply displacement relative to start-offset
-                        pos.x = targetWorldPos[0] - dragStartOffset.x;
-                        pos.y = targetWorldPos[1] - dragStartOffset.y;
-                        pos.z = targetWorldPos[2] - dragStartOffset.z;
+                        // Apply displacement relative to start-offset and centroid
+                        const cen = state.ui.centroid;
+                        pos.x = targetWorldPos[0] - dragStartOffset.x - cen.x;
+                        pos.y = targetWorldPos[1] - dragStartOffset.y - cen.y;
+                        pos.z = targetWorldPos[2] - dragStartOffset.z - cen.z;
                     }
                 } else if (dragAxis === 'x' || dragAxis === 'y' || dragAxis === 'z') {
                     // Relative Axis Projection: Zero-Snap Manifest
                     const dir = window.ENGINE.GizmoRenderer.getAxisDirection(dragAxis, state.object.rot);
-                    const origin = [dragStartPos.x, dragStartPos.y, dragStartPos.z];
+                    const cen = state.ui.centroid;
+                    const origin = [dragStartPos.x + cen.x, dragStartPos.y + cen.y, dragStartPos.z + cen.z];
                     const p0 = window.ENGINE.GizmoRenderer.projectPoint(origin, mView, lw, lh, fovScale);
                     const p1 = window.ENGINE.GizmoRenderer.projectPoint([origin[0] + dir[0], origin[1] + dir[1], origin[2] + dir[2]], mView, lw, lh, fovScale);
 

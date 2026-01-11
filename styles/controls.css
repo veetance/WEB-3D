@@ -15,6 +15,31 @@ input[type="range"] {
     cursor: pointer;
     background: #222;
     border-radius: 1px;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 1px;
+    background: #00ffd2;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 255, 210, 0.4);
+    border: none;
+    margin-top: -3.5px;
+    /* Center 10px thumb on 3px track */
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    border-radius: 1px;
+    background: #00ffd2;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 255, 210, 0.4);
+    border: none;
 }
 
 /* Color Picker - Small Square Motif */
@@ -180,13 +205,18 @@ input:checked+.switch-slider:before {
     border-color: rgba(0, 255, 210, 0.3);
 }
 
-/* Match container corner radius for edge buttons */
-.btn-group .view-btn.active:first-child {
-    border-radius: 6px 0 0 6px;
+/* Match container corner radius for direct edge buttons only */
+.btn-group>.view-btn.active:first-child {
+    border-radius: 5px 0 0 5px;
 }
 
-.btn-group .view-btn.active:last-child {
-    border-radius: 0 6px 6px 0;
+.btn-group>.view-btn.active:last-child {
+    border-radius: 0 5px 5px 0;
+}
+
+/* If the container is the last child, handle its button */
+.btn-group> :last-child .view-btn.active {
+    border-radius: 0 5px 5px 0;
 }
 
 /* Unified Hardware Switch Container */
@@ -299,4 +329,60 @@ input:checked+.switch-slider:before {
 
 input[type="file"] {
     display: none;
+}
+
+/* Point Cloud Digital Lattice Slider */
+.point-cloud-container {
+    position: relative;
+    flex: 1;
+    display: flex;
+}
+
+.point-cloud-container .mode-btn {
+    width: 100%;
+}
+
+.point-slider {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 100% !important;
+    height: 0.5px !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+    margin: 0 !important;
+}
+
+.point-cloud-container:hover .point-slider,
+.point-slider:hover {
+    opacity: 1;
+    pointer-events: auto;
+    top: 1px;
+}
+
+/* Specific Thumb Refinement for Point Slider - Micro-Lattice Marker */
+.point-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 2px;
+    height: 2px;
+    background: #00ffd2;
+    border-radius: 0.5px;
+    border: none;
+    box-shadow: 0 0 3px rgba(0, 255, 210, 0.8);
+    cursor: pointer;
+    margin-top: -0.75px;
+    /* Precision centering */
+}
+
+.point-slider::-moz-range-thumb {
+    width: 2px;
+    height: 2px;
+    background: #00ffd2;
+    border-radius: 0.5px;
+    border: none;
+    box-shadow: 0 0 3px rgba(0, 255, 210, 0.8);
+    cursor: pointer;
 }

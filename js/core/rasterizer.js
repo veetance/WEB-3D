@@ -46,26 +46,6 @@ window.ENGINE.Rasterizer = (function () {
         }
     }
 
-    function drawPoints(ctx, screen, vCount, config) {
-        const baseColor = config.fg || '#00ffd2';
-        const size = Math.max(0.5, config.thickness * 0.5); // Smaller, sharper stars
-
-        ctx.fillStyle = baseColor;
-
-        // High-density optimization: Batching points by opacity for 'star' feel
-        for (let i = 0; i < vCount; i++) {
-            const i4 = i << 2;
-            if (screen[i4 + 3] > 0) {
-                // Stochastic alpha for star-shimmer effect
-                if (i % 3 === 0) ctx.globalAlpha = 0.4 + Math.random() * 0.6;
-                else ctx.globalAlpha = 0.8;
-
-                ctx.fillRect(screen[i4], screen[i4 + 1], size, size);
-            }
-        }
-        ctx.globalAlpha = 1.0;
-    }
-
     function drawRuler(ctx, out) {
         // Clinical Gray (Dimmed relative to grid)
         ctx.strokeStyle = "rgba(85, 85, 85, 0.35)";
@@ -86,5 +66,5 @@ window.ENGINE.Rasterizer = (function () {
 
     function drawGizmo(ctx, out) { }
 
-    return { drawFaces, drawPoints, drawRuler, drawGizmo };
+    return { drawFaces, drawRuler, drawGizmo };
 })();

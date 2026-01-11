@@ -48,12 +48,22 @@ window.ENGINE.Transfer = (function () {
 
                     if (model.vertices.length === 0) throw new Error("Parsed model is empty");
 
-                    store.dispatch({ type: 'SET_MODEL', payload: { ...model, name } });
+                    const clusters = window.ENGINE.Optimizer.buildClusters(model.vertices, model.indices, 128);
+
+                    store.dispatch({
+                        type: 'SET_MODEL',
+                        payload: {
+                            vertices: model.vertices,
+                            indices: model.indices,
+                            centroid: model.centroid,
+                            clusters,
+                            name
+                        }
+                    });
 
                     // Clear primitive selection visuals
                     document.querySelectorAll('.prim-btn').forEach(b => b.classList.remove('active'));
 
-                    store.dispatch({ type: 'SET_VIEW_MODE', payload: 'WIRE' });
                     console.log(`VFE: Model Matched. Manifold stabilized.`);
                 } catch (err) {
                     console.error('Core Logic IO Error:', err);

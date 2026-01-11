@@ -11,9 +11,9 @@
         localStorage.clear();
         if (!canvas || !overlay) return;
 
-        // Dual-Stage Context Initialization
-        const isGL = window.ENGINE.GL.init(canvas);
-        const mainCtx = isGL ? canvas.getContext('webgl') : canvas.getContext('2d');
+        // Baseline Software Transformation initialization
+        const isGL = false;
+        const mainCtx = canvas.getContext('2d');
         const overlayCtx = overlay.getContext('2d');
 
         window.ENGINE.isGL = isGL;

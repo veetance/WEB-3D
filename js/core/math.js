@@ -236,5 +236,106 @@ window.ENGINE.MathOps = {
         }
 
         return sI;
+    },
+    /**
+     * Structured Lattice Sampler
+     * Distributes points in a grid-like pattern across triangle faces.
+     */
+    sampleSurfaceGrid: (out, vertices, indices, fCount, sCount) => {
+        if (fCount === 0 || sCount <= 0) return 0;
+
+        let pIdx = 0;
+        const seenPoints = new Set();
+        const spatialScale = 10000;
+
+        const addPoint = (x, y, z) => {
+            if (pIdx >= sCount) return false;
+            const key = `${Math.round(x * spatialScale)},${Math.round(y * spatialScale)},${Math.round(z * spatialScale)}`;
+            if (seenPoints.has(key)) return false;
+
+            const ox = pIdx * 3;
+            out[ox] = x; out[ox + 1] = y; out[ox + 2] = z;
+            seenPoints.add(key);
+            pIdx++;
+            return true;
+        };
+
+        // Path A: The Vertex Shell (Foundation)
+        // We sample vertices to define the outline without hogging the budget.
+        const vCount = vertices.length / 3;
+        const shellBudget = Math.floor(sCount * 0.2);
+        const shellStep = Math.max(1, Math.floor(vCount / shellBudget));
+
+        for (let i = 0; i < vCount; i += shellStep) {
+            const ix = i * 3;
+            addPoint(vertices[ix], vertices[ix + 1], vertices[ix + 2]);
+            if (pIdx >= sCount) break;
+        }
+
+        if (pIdx >= sCount) return pIdx;
+
+        // Area Weighting
+        let totalArea = 0;
+        const faceAreas = new Float32Array(fCount);
+        for (let i = 0; i < fCount; i++) {
+            const i3 = i * 3, a = indices[i3] * 3, b = indices[i3 + 1] * 3, c = indices[i3 + 2] * 3;
+            const ax = vertices[b] - vertices[a], ay = vertices[b + 1] - vertices[a + 1], az = vertices[b + 2] - vertices[a + 2];
+            const bx = vertices[c] - vertices[a], by = vertices[c + 1] - vertices[a + 1], bz = vertices[c + 2] - vertices[a + 2];
+            const area = 0.5 * Math.sqrt((ay * bz - az * by) ** 2 + (az * bx - ax * bz) ** 2 + (ax * by - ay * bx) ** 2);
+            faceAreas[i] = area;
+            totalArea += area;
+        }
+
+        const remainingBudget = sCount - pIdx;
+        const density = remainingBudget / totalArea;
+
+        for (let i = 0; i < fCount; i++) {
+            if (pIdx >= sCount) break;
+            const area = faceAreas[i];
+            const expectedPoints = area * density;
+            const subs = Math.floor((-3 + Math.sqrt(1 + 8 * expectedPoints)) / 2);
+
+            const i3 = i * 3, a = indices[i3] * 3, b = indices[i3 + 1] * 3, c = indices[i3 + 2] * 3;
+            const v1x = vertices[a], v1y = vertices[a + 1], v1z = vertices[a + 2];
+            const v2x = vertices[b], v2y = vertices[b + 1], v2z = vertices[b + 2];
+            const v3x = vertices[c], v3y = vertices[c + 1], v3z = vertices[c + 2];
+
+            if (subs <= 0) {
+                if (Math.random() < expectedPoints) {
+                    const r1 = Math.random(), r2 = Math.random();
+                    const w1 = 1 - Math.sqrt(r1), w2 = Math.sqrt(r1) * (1 - r2), w3 = Math.sqrt(r1) * r2;
+                    addPoint(w1 * v1x + w2 * v2x + w3 * v3x, w1 * v1y + w2 * v2y + w3 * v3y, w1 * v1z + w2 * v2z + w3 * v3z);
+                }
+                continue;
+            }
+
+            const step = 1.0 / (subs + 1);
+            for (let u = 0; u <= subs + 1; u++) {
+                for (let v = 0; v <= subs + 1 - u; v++) {
+                    const bu = u * step;
+                    const bv = v * step;
+                    const bw = 1.0 - bu - bv;
+                    addPoint(bu * v1x + bv * v2x + bw * v3x, bu * v1y + bv * v2y + bw * v3y, bu * v1z + bv * v2z + bw * v3z);
+                    if (pIdx >= sCount) break;
+                }
+                if (pIdx >= sCount) break;
+            }
+        }
+        return pIdx;
+    },
+
+    /**
+     * Compute geometric centroid of a vertex buffer.
+     */
+    computeCentroid: (vertices) => {
+        const count = vertices.length / 3;
+        if (count === 0) return { x: 0, y: 0, z: 0 };
+        let sx = 0, sy = 0, sz = 0;
+        for (let i = 0; i < vertices.length; i += 3) {
+            sx += vertices[i];
+            sy += vertices[i + 1];
+            sz += vertices[i + 2];
+        }
+        return { x: sx / count, y: sy / count, z: sz / count };
     }
 };

@@ -17,7 +17,18 @@ window.ENGINE.Pool = (function () {
         // Auxiliary buffers for radix sort
         auxIndices: new Int32Array(Config.MAX_FACES),
         auxDepth: new Float32Array(Config.MAX_FACES),
-        radixCounts: new Int32Array(65536)
+        radixCounts: new Int32Array(65536),
+
+        // RAW Pixel-Buffer (Software Path) - 1024x1024 cap
+        framebuffer: new Uint32Array(1024 * 1024),
+        pixelDepth: new Float32Array(1024 * 1024),
+        sampledWorld: new Float32Array(100000 * 3), // Local space points
+        sampledScreen: new Float32Array(100000 * 4), // Screen space points
+
+        // Scanline Edge Table (y-max, x, 1/m, z, 1/mz)
+        // [minY...maxY] -> list of edges starting at Y
+        edgeTable: new Float32Array(2048 * 4 * 10), // Max 10 edges per scanline for vertical height
+        activeEdges: new Int32Array(1000) // Indices for active edge list
     };
 
     function reset() { }

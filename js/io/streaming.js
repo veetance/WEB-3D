@@ -50,33 +50,44 @@ window.ENGINE.StreamingTransfer = (function () {
             };
 
             const finalizeModel = (vArrays, iArrays) => {
-                if (text) text.textContent = "STABILIZING GEOMETRY...";
+                const name = file.name.split('.').slice(0, -1).join('.') || 'model';
+                if (text) text.textContent = "STABILIZING MANIFOLD...";
 
-                // Merge Typed Arrays
-                const totalV = vArrays.reduce((s, a) => s + a.length, 0);
-                const totalI = iArrays.reduce((s, a) => s + a.length, 0);
+                setTimeout(() => {
+                    try {
+                        const totalV = vArrays.reduce((s, a) => s + a.length, 0);
+                        const totalI = iArrays.reduce((s, a) => s + a.length, 0);
 
-                const vFlat = new Float32Array(totalV);
-                const iFlat = new Uint32Array(totalI);
+                        const vFlat = new Float32Array(totalV);
+                        const iFlat = new Uint32Array(totalI);
 
-                let vOffset = 0;
-                for (const arr of vArrays) {
-                    vFlat.set(arr, vOffset);
-                    vOffset += arr.length;
-                }
+                        let vOffset = 0;
+                        for (const arr of vArrays) { vFlat.set(arr, vOffset); vOffset += arr.length; }
 
-                let iOffset = 0;
-                for (const arr of iArrays) {
-                    iFlat.set(arr, iOffset);
-                    iOffset += arr.length;
-                }
+                        let iOffset = 0;
+                        for (const arr of iArrays) { iFlat.set(arr, iOffset); iOffset += arr.length; }
 
-                store.dispatch({
-                    type: 'SET_MODEL',
-                    payload: { vertices: vFlat, indices: iFlat }
-                });
+                        const stabilized = window.ENGINE.Parser.finalizeManifold(vFlat, iFlat, false);
 
-                if (overlay) overlay.classList.add('hidden');
+                        // Cluster Partitioning (Pre-Cache)
+                        const clusters = window.ENGINE.Optimizer.buildClusters(stabilized.vertices, stabilized.indices, 128);
+
+                        store.dispatch({
+                            type: 'SET_MODEL',
+                            payload: {
+                                vertices: stabilized.vertices,
+                                indices: stabilized.indices,
+                                centroid: stabilized.centroid,
+                                clusters,
+                                name
+                            }
+                        });
+                    } catch (err) {
+                        console.error('Core Logic Streaming Error:', err);
+                    } finally {
+                        if (overlay) overlay.classList.add('hidden');
+                    }
+                }, 50);
             };
 
             readNextChunk();

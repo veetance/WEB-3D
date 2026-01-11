@@ -3,31 +3,16 @@
  */
 window.ENGINE = window.ENGINE || {};
 window.ENGINE.Renderer = (function () {
-    let mode = 'GPU'; // default mode
-    let canvas = null;
-
-    // --- GPU/CPU Mode API ---
-    const setMode = (m) => { mode = m; };
-    const getMode = () => mode;
-    const initGL = (c) => {
-        canvas = c;
-        if (mode === 'GPU') {
-            return window.ENGINE.GL.init(canvas);
-        } else {
-            const ctx2d = canvas.getContext('2d');
-            if (ctx2d) ctx2d.clearRect(0, 0, canvas.width, canvas.height);
-            return false;
-        }
+    // --- Pure Software Renderer API ---
+    const init = (canvas) => {
+        if (!canvas) return;
+        const ctx2d = canvas.getContext('2d');
+        if (ctx2d) ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+        return false; // isGL = false
     };
-    const renderGL = (vertices, indices, modelView, projection, config) => {
-        if (mode === 'GPU') {
-            window.ENGINE.GL.render(vertices, indices, modelView, projection, config);
-        } else {
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                ctx && ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
-        }
+
+    const render = () => {
+        // No-op for legacy sync
     };
 
     // --- Legacy 2D Drawing Helpers (used by engine.js CPU path and Overlay) ---
@@ -88,10 +73,8 @@ window.ENGINE.Renderer = (function () {
     };
 
     return {
-        setMode,
-        getMode,
-        init: initGL,
-        render: renderGL,
+        init,
+        render,
         clear,
         fillPolygon,
         strokePolygon,

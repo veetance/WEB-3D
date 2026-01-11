@@ -11,12 +11,11 @@ window.ENGINE.Parser = (function () {
      * Common Normalization & Transform Utility
      */
     function finalizeManifold(vertices, indices, isGLB) {
-        if (vertices.length === 0) return { vertices, indices };
+        if (vertices.length === 0) return { vertices, indices, centroid: { x: 0, y: 0, z: 0 } };
 
-        // 1. Calculate Bounding Box
+        // Pass 1: Bounding Box
         let minX = Infinity, minY = Infinity, minZ = Infinity;
         let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
-
         for (let i = 0; i < vertices.length; i += 3) {
             const x = vertices[i], y = vertices[i + 1], z = vertices[i + 2];
             if (x < minX) minX = x; if (x > maxX) maxX = x;
@@ -24,49 +23,44 @@ window.ENGINE.Parser = (function () {
             if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
         }
 
+        const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2, cz = (minZ + maxZ) / 2;
         const maxRange = Math.max(maxX - minX, maxY - minY, maxZ - minZ) || 1;
-        const scale = 15.0 / maxRange;
+        const scale = 6.0 / maxRange;
 
-        const cx = (minX + maxX) / 2;
-        const cy = (minY + maxY) / 2;
-        const cz = (minZ + maxZ) / 2;
+        // Pass 2: Sovereign Orientation & Transformation
+        let sx = 0, sy = 0, sz = 0;
+        let pZ = Infinity;
+        const len = vertices.length;
 
-        // 2. Center and Normalize with High-Fidelity Orientation Correction
-        for (let i = 0; i < vertices.length; i += 3) {
-            let x = (vertices[i] - cx) * scale;
-            let y = (vertices[i + 1] - cy) * scale;
-            let z = (vertices[i + 2] - cz) * scale;
+        for (let i = 0; i < len; i += 3) {
+            const tx = (vertices[i] - cx) * scale;
+            const ty = (vertices[i + 1] - cy) * scale;
+            const tz = (vertices[i + 2] - cz) * scale;
 
-            // Many OBJs imported 'lying down' are Y-forward or X-forward.
-            // We force elevation (Z) to the source's longest vertical intention.
-            if (isGLB) {
-                vertices[i] = x;
-                vertices[i + 1] = -z;
-                vertices[i + 2] = y;
-            } else {
-                // If it was lying face up as (x,y,z), then Y was elevation.
-                // We map Y to Z, and rotate Z to Y.
-                vertices[i] = x;
-                vertices[i + 1] = z;  // Map depth
-                vertices[i + 2] = -y; // Map elevation with inversion to stand it up
+            // VEETANCE Calibration: Z=Up, Faced Front (-Y)
+            const nx = tx;
+            const ny = -tz;
+            const nz = ty;
 
-                // Final recalibration: Try standard rotation that often fixes OBJ
-                vertices[i] = x;
-                vertices[i + 1] = -y;
-                vertices[i + 2] = z;
-            }
+            vertices[i] = nx;
+            vertices[i + 1] = ny;
+            vertices[i + 2] = nz;
+
+            sx += nx; sy += ny; sz += nz;
+            if (nz < pZ) pZ = nz;
         }
 
-        // 3. Post-Normalization Flattening (Sit on Z=0 Plane)
-        let groundZ = Infinity;
-        for (let i = 2; i < vertices.length; i += 3) {
-            if (vertices[i] < groundZ) groundZ = vertices[i];
-        }
-        for (let i = 2; i < vertices.length; i += 3) {
-            vertices[i] -= groundZ;
-        }
+        // Pass 3: Manifold Realignment (Grounding)
+        const vCount = len / 3;
+        for (let i = 2; i < len; i += 3) vertices[i] -= pZ;
 
-        return { vertices, indices };
+        const centroid = {
+            x: sx / vCount,
+            y: sy / vCount,
+            z: (sz / vCount) - pZ
+        };
+
+        return { vertices, indices, centroid };
     }
 
     return {
@@ -180,6 +174,7 @@ window.ENGINE.Parser = (function () {
             for (const nodeIdx of scene.nodes) processNode(nodeIdx, mat4.create());
 
             return finalizeManifold(new Float32Array(allV), new Uint32Array(allI), true);
-        }
+        },
+        finalizeManifold
     };
 })();
