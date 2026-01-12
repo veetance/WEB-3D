@@ -134,79 +134,65 @@ window.ENGINE.Core = (function () {
 
         mat4.multiply(mTotal, mView, mModel);
 
-        MathOps.transformBuffer(buffers.world, vertices, mTotal, vCount);
+        const WASM = window.ENGINE.RasterizerWASM;
+        const useWASM = WASM && WASM.isReady();
+
         const fovScale = (canvas.height / 2) / Math.tan((config.fov * 0.5) * Math.PI / 180);
 
-        // Required for interaction/outlines even in POINTS mode
-        buffers.screen.set(buffers.world.subarray(0, vCount * 4));
-        MathOps.projectBuffer(buffers.screen, vCount, canvas.width, canvas.height, fovScale);
-
-        if (config.viewMode === 'POINTS') {
-            const sBudget = config.pointBudget || 20000;
-            // Persistence Check
-            if (lastBudget !== sBudget || lastVerts !== vertices) {
-                lastBudget = sBudget;
+        if (useWASM && config.viewMode !== 'POINTS') {
+            // --- NATIVE WASM PIPELINE --- 🚀
+            if (lastVerts !== vertices) {
                 lastVerts = vertices;
-                lastSCount = MathOps.sampleSurfaceGrid(buffers.sampledWorld, vertices, indices, fCount, sBudget);
+                WASM.uploadIndices(indices);
             }
-            if (lastSCount > 0) {
-                MathOps.transformBuffer(buffers.sampledScreen, buffers.sampledWorld, mTotal, lastSCount);
-                MathOps.projectBuffer(buffers.sampledScreen, lastSCount, canvas.width, canvas.height, fovScale);
-                const RP = window.ENGINE.RasterizerPixel;
-                RP.clearHW(canvas.width, canvas.height);
-                RP.renderPoints(mainCtx, buffers.sampledScreen, lastSCount, config, canvas.width, canvas.height);
-                RP.flush(mainCtx, canvas.width, canvas.height);
+
+            WASM.processVertices(object.wasmPtr || vertices, mTotal, vCount);
+            WASM.project(vCount, canvas.width, canvas.height, fovScale);
+
+            const isWire = config.viewMode !== 'SOLID';
+            const density = config.wireDensity !== undefined ? config.wireDensity : 1.0;
+            const validFaces = WASM.processFaces(fCount, lightDir, isWire, canvas.width, canvas.height, density);
+
+            if (validFaces > 0) {
+                const sorted = WASM.sortFaces(validFaces);
+                const isPixelPath = config.viewMode === 'SOLID' || config.viewMode === 'SHADED_WIRE';
+
+                if (isPixelPath) {
+                    WASM.clearHW(canvas.width, canvas.height);
+                    WASM.render(mainCtx, validFaces, config, canvas.width, canvas.height, true);
+                    WASM.flush(mainCtx, canvas.width, canvas.height);
+                }
+
+                if (config.viewMode !== 'SOLID') {
+                    Rasterizer.drawFaces(mainCtx, buffers, sorted, indices, validFaces, config, object.edges, object.clusters, null);
+                }
             }
         } else {
-            const world = buffers.world, screen = buffers.screen, depths = buffers.depth, sIdx = buffers.sortIndices, intensities = buffers.intensity;
-            const isWire = config.viewMode === 'WIRE';
-            let validFaces = 0;
-            const clusters = object.clusters;
-            const clusterVisibility = clusters ? new Uint8Array(clusters.length) : null;
+            // --- LEGACY JS PATH --- 🐌
+            MathOps.transformBuffer(buffers.world, vertices, mTotal, vCount);
+            buffers.screen.set(buffers.world.subarray(0, vCount * 4));
+            MathOps.projectBuffer(buffers.screen, vCount, canvas.width, canvas.height, fovScale);
 
-            if (clusters) {
-                for (let c = 0; c < clusters.length; c++) {
-                    const cluster = clusters[c];
-                    const [cx, cy, cz, radius] = cluster.sphere;
-
-                    // 1. Cluster Culling (Sphere-Frustum)
-                    const cp = [cx, cy, cz, 1.0];
-                    MathOps.mat4.transformVec4(cp, mTotal, cp);
-                    const w = cp[3];
-                    const rScale = fovScale / (w || 1);
-                    const screenR = radius * rScale;
-
-                    // Aggressive screen-space frustum cull
-                    if (w < -radius) continue; // Behind camera
-                    if (Math.abs(cp[0] / w) > 1.2 && Math.abs(cp[0]) > screenR) continue;
-                    if (Math.abs(cp[1] / w) > 1.2 && Math.abs(cp[1]) > screenR) continue;
-
-                    // Mark cluster as visible
-                    clusterVisibility[c] = 1;
-
-                    // 2. Process triangles in visible cluster
-                    for (let j = 0; j < cluster.faceCount; j++) {
-                        const i = cluster.startFace + j;
-                        const i3 = i * 3, i0 = indices[i3], i1 = indices[i3 + 1], i2 = indices[i3 + 2], i04 = i0 << 2, i14 = i1 << 2, i24 = i2 << 2;
-
-                        if (screen[i04 + 3] < 0 || screen[i14 + 3] < 0 || screen[i24 + 3] < 0) continue;
-
-                        const area = (screen[i14] - screen[i04]) * (screen[i24 + 1] - screen[i04 + 1]) - (screen[i14 + 1] - screen[i04 + 1]) * (screen[i24] - screen[i04]);
-                        if (area > 0 && !isWire) continue;
-
-                        const ax = world[i14] - world[i04], ay = world[i14 + 1] - world[i04 + 1], az = world[i14 + 2] - world[i04 + 2], bx = world[i24] - world[i04], by = world[i24 + 1] - world[i04 + 1], bz = world[i24 + 2] - world[i04 + 2];
-                        let nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx;
-                        const len = nx * nx + ny * ny + nz * nz;
-                        if (len > 0) { const invLen = 1 / Math.sqrt(len); nx *= invLen; ny *= invLen; nz *= invLen; }
-
-                        intensities[i] = Math.max(0.2, (nx * lightDir[0] + ny * lightDir[1] + nz * lightDir[2]) * 0.8 + 0.2);
-                        depths[validFaces] = (world[i04 + 2] + world[i14 + 2] + world[i24 + 2]) * 0.333333;
-                        sIdx[validFaces] = i;
-                        validFaces++;
-                    }
+            if (config.viewMode === 'POINTS') {
+                const sBudget = config.pointBudget || 20000;
+                if (lastBudget !== sBudget || lastVerts !== vertices) {
+                    lastBudget = sBudget; lastVerts = vertices;
+                    lastSCount = MathOps.sampleSurfaceGrid(buffers.sampledWorld, vertices, indices, fCount, sBudget);
+                }
+                if (lastSCount > 0) {
+                    MathOps.transformBuffer(buffers.sampledScreen, buffers.sampledWorld, mTotal, lastSCount);
+                    MathOps.projectBuffer(buffers.sampledScreen, lastSCount, canvas.width, canvas.height, fovScale);
+                    const RP = window.ENGINE.RasterizerPixel;
+                    RP.clearHW(canvas.width, canvas.height);
+                    RP.renderPoints(mainCtx, buffers.sampledScreen, lastSCount, config, canvas.width, canvas.height);
+                    RP.flush(mainCtx, canvas.width, canvas.height);
                 }
             } else {
-                // Fallback for objects without cluster data
+                const world = buffers.world, screen = buffers.screen, depths = buffers.depth, sIdx = buffers.sortIndices, intensities = buffers.intensity;
+                const isWire = config.viewMode === 'WIRE';
+                let validFaces = 0;
+                const clusters = object.clusters;
+
                 for (let i = 0; i < fCount; i++) {
                     const i3 = i * 3, i0 = indices[i3], i1 = indices[i3 + 1], i2 = indices[i3 + 2], i04 = i0 << 2, i14 = i1 << 2, i24 = i2 << 2;
                     if (screen[i04 + 3] < 0 || screen[i14 + 3] < 0 || screen[i24 + 3] < 0) continue;
@@ -220,25 +206,18 @@ window.ENGINE.Core = (function () {
                     depths[validFaces] = (world[i04 + 2] + world[i14 + 2] + world[i24 + 2]) * 0.333333;
                     sIdx[validFaces] = i; validFaces++;
                 }
-            }
-            if (validFaces > 0) {
-                const sorted = MathOps.radixSort(sIdx, depths, validFaces, buffers.auxIndices, buffers.auxDepth, buffers.radixCounts);
 
-                const RP = window.ENGINE.RasterizerPixel;
-                const isPixelPath = config.viewMode === 'SOLID' || config.viewMode === 'SHADED_WIRE';
-
-                if (isPixelPath) {
-                    const WASM = window.ENGINE.RasterizerWASM;
-                    const RP = (WASM && WASM.isReady()) ? WASM : window.ENGINE.RasterizerPixel;
-
-                    RP.clearHW(canvas.width, canvas.height);
-                    RP.render(mainCtx, screen, indices, intensities, sorted, validFaces, config, canvas.width, canvas.height, true);
-                    RP.flush(mainCtx, canvas.width, canvas.height);
-                }
-
-                // Pass cluster visibility to wireframe renderer
-                if (config.viewMode !== 'SOLID') {
-                    Rasterizer.drawFaces(mainCtx, buffers, sorted, indices, validFaces, config, object.edges, clusters, clusterVisibility);
+                if (validFaces > 0) {
+                    const sorted = MathOps.radixSort(sIdx, depths, validFaces, buffers.auxIndices, buffers.auxDepth, buffers.radixCounts);
+                    const RP = window.ENGINE.RasterizerPixel;
+                    if (config.viewMode === 'SOLID' || config.viewMode === 'SHADED_WIRE') {
+                        RP.clearHW(canvas.width, canvas.height);
+                        RP.render(mainCtx, screen, indices, intensities, sorted, validFaces, config, canvas.width, canvas.height, true);
+                        RP.flush(mainCtx, canvas.width, canvas.height);
+                    }
+                    if (config.viewMode !== 'SOLID') {
+                        Rasterizer.drawFaces(mainCtx, buffers, sorted, indices, validFaces, config, object.edges, clusters, null);
+                    }
                 }
             }
         }

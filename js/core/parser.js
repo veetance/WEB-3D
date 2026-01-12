@@ -36,31 +36,27 @@ window.ENGINE.Parser = (function () {
             const tx = (vertices[i] - cx) * scale;
             const ty = (vertices[i + 1] - cy) * scale;
             const tz = (vertices[i + 2] - cz) * scale;
-
-            // VEETANCE Calibration: Z=Up, Faced Front (-Y)
-            const nx = tx;
-            const ny = -tz;
-            const nz = ty;
-
-            vertices[i] = nx;
-            vertices[i + 1] = ny;
-            vertices[i + 2] = nz;
-
+            const nx = tx, ny = -tz, nz = ty;
+            vertices[i] = nx; vertices[i + 1] = ny; vertices[i + 2] = nz;
             sx += nx; sy += ny; sz += nz;
             if (nz < pZ) pZ = nz;
         }
 
-        // Pass 3: Manifold Realignment (Grounding)
         const vCount = len / 3;
         for (let i = 2; i < len; i += 3) vertices[i] -= pZ;
 
-        const centroid = {
-            x: sx / vCount,
-            y: sy / vCount,
-            z: (sz / vCount) - pZ
-        };
+        const centroid = { x: sx / vCount, y: sy / vCount, z: (sz / vCount) - pZ };
 
-        return { vertices, indices, centroid };
+        // EXTREME OPTIMIZATION: Move vertices to WASM heap immediately
+        const WASM = window.ENGINE.RasterizerWASM;
+        let wasmPtr = null;
+        if (WASM && WASM.isReady()) {
+            wasmPtr = WASM.malloc(vertices.byteLength);
+            const heapView = new Float32Array(window.Module.HEAPU8.buffer, wasmPtr, vertices.length);
+            heapView.set(vertices);
+        }
+
+        return { vertices, indices, centroid, wasmPtr };
     }
 
     return {

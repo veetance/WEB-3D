@@ -6,10 +6,12 @@ Write-Host "Building WASM Rasterizer..." -ForegroundColor Cyan
 
 # Build command that works
 emcc ..\js\core\wasm\rasterizer.cpp `
-    -o ..\js\core\wasm\rasterizer.js `
+    -o ..\js\core\wasm\rasterizer_v2.js `
     -O3 `
+    -msimd128 `
     -s WASM=1 `
-    -s EXPORTED_FUNCTIONS="['_drawTriangle','_clearBuffers','_renderBatch']"
+    -s INITIAL_MEMORY=268435456 `
+    -s EXPORTED_FUNCTIONS="['_drawTriangle','_clearBuffers','_renderBatch','_radixSort','_malloc','_free','_transformBuffer','_projectBuffer','_processFaces']"
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""
@@ -25,5 +27,4 @@ else {
     Write-Host "[ERROR] Build failed" -ForegroundColor Red
 }
 
-Write-Host ""
-pause
+# No pause needed for automated runs
