@@ -228,6 +228,9 @@ window.ENGINE.Core = (function () {
                 const isPixelPath = config.viewMode === 'SOLID' || config.viewMode === 'SHADED_WIRE';
 
                 if (isPixelPath) {
+                    const WASM = window.ENGINE.RasterizerWASM;
+                    const RP = (WASM && WASM.isReady()) ? WASM : window.ENGINE.RasterizerPixel;
+
                     RP.clearHW(canvas.width, canvas.height);
                     RP.render(mainCtx, screen, indices, intensities, sorted, validFaces, config, canvas.width, canvas.height, true);
                     RP.flush(mainCtx, canvas.width, canvas.height);

@@ -109,6 +109,11 @@
 
         // Boot Main Loop
         const store = window.ENGINE.Store;
+        // Initialize WASM Manifold
+        if (window.ENGINE.RasterizerWASM) {
+            window.ENGINE.RasterizerWASM.init();
+        }
+
         store.dispatch({
             type: 'SET_PRIMITIVE',
             payload: store.getState().ui.currentPrimitive

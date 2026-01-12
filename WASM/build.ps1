@@ -9,7 +9,7 @@ emcc ..\js\core\wasm\rasterizer.cpp `
     -o ..\js\core\wasm\rasterizer.js `
     -O3 `
     -s WASM=1 `
-    -s EXPORTED_FUNCTIONS="['_drawTriangle','_clearBuffers']"
+    -s EXPORTED_FUNCTIONS="['_drawTriangle','_clearBuffers','_renderBatch']"
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""

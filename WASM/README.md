@@ -29,22 +29,18 @@ cd C:\D-DRIVE\WEB-3D\WASM
 
 ---
 
-### `build-wasm.ps1`
+### `build.ps1`
 WASM compilation script for the rasterizer.
 
 **What it does:**
-- Creates `js/core/wasm/` directory
-- Generates placeholder C++ rasterizer
-- Compiles to 3 WASM variants:
-  - `rasterizer-dev.wasm` (Debug)
-  - `rasterizer.wasm` (Optimized)
-  - `rasterizer-simd.wasm` (SIMD)
+- Compiles `js/core/wasm/rasterizer.cpp` to WebAssembly.
+- Automatically activates the Emscripten environment.
+- Outputs `rasterizer.wasm` and `rasterizer.js`.
 
 **How to run:**
 ```powershell
-# After running setup-wasm.ps1:
 cd C:\D-DRIVE\WEB-3D\WASM
-.\build-wasm.ps1
+.\build.ps1
 ```
 
 **Prerequisites:**
@@ -67,7 +63,7 @@ cd C:\D-DRIVE\WEB-3D\WASM
 **Step 3: Build WASM modules**
 ```powershell
 cd C:\D-DRIVE\WEB-3D\WASM
-.\build-wasm.ps1
+.\build.ps1
 ```
 
 **Step 4: Verify**
