@@ -99,11 +99,11 @@ canvas#game:active {
 #infobar {
     position: absolute;
     bottom: 54px;
-    /* Stacked above Primitive Switcher (10px + ~36px + 8px gap) */
-    left: 10px;
+    /* Stacked above Primitive Switcher */
+    left: 50%;
+    transform: translateX(-50%);
     min-width: 204px;
     width: auto;
-    /* Matches Switcher Width */
     box-sizing: border-box;
     padding: 4px 10px;
     background: rgba(10, 10, 10, 0.4);
@@ -284,11 +284,11 @@ canvas#game:active {
 #primitive-switcher {
     position: absolute;
     bottom: 10px;
-    left: 10px;
+    left: 50%;
+    transform: translateX(-50%);
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    /* Enforce center, prevent stretch */
     gap: 4px;
     padding: 4px;
     background: rgba(10, 10, 10, 0.4);

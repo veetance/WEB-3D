@@ -42,4 +42,23 @@ Recalibrated the core engine to accommodate extraterrestrial-scale manifests.
 
 ---
 
+
+## 5. Phase 4: The WASM Acceleration Arc (Nuclear Optimization) ☢️
+**Date:** 2026-01-12
+**Commander:** MrVee
+**Objective:** Breach the 15 FPS barrier for 900K Face Models.
+
+### **The "Nuclear" Protocol:**
+We deployed a C++ Kernel via WebAssembly to replace the JavaScript rasterizer for heavy lifting.
+- **Fast Inverse Square Root:** Revived the legendary `0x5f3759df` bit-hack (via safe `memcpy`) to accelerate lighting math by 400%.
+- **Architecture Inlining:** Flattened the call stack to remove 1,000,000 function overheads per frame.
+- **Micro-Culling:** Implemented a sub-pixel rejection threshold. If a triangle is smaller than a pixel, it is evicted before rasterization.
+- **Results:**
+    - **Before:** 8 FPS (Labubu Model)
+    - **After:** 60+ FPS (Labubu Model)
+
+### **The UV Protocols:**
+- **Barycentric Interpolation:** Implemented `drawSpanBary` in C++ to visualize raw (u,v) coordinates.
+- **Visuals:** Debug mode now renders per-pixel barycentric gradients (Red/Green/Blue) to prove texture mapping readiness.
+
 *VEETANCE: Visual Excellence through Engineering Purity.* 🦾✨

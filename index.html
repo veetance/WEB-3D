@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VEETANCE 3D Engine</title>
+    <title>DEUS ENGINE | F.A.S.T. Software Rasterizer</title>
+    <script src="coi-serviceworker.js"></script>
+
 
     <!-- Fragmented Styles -->
     <link rel="stylesheet" href="styles/base.css">
@@ -13,6 +15,10 @@
     <link rel="stylesheet" href="styles/viewport.css">
     <link rel="stylesheet" href="styles/gizmo.css">
     <link rel="stylesheet" href="styles/modal.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;900&family=Outfit:wght@200;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="styles/colorpicker.css">
@@ -22,7 +28,7 @@
     <!-- Collapsible Side Panel -->
     <aside id="sidebar">
         <div class="panel-header">
-            <h1>F.A.S.T. ENGINE</h1>
+            <h1><span class="brand-bold">DEUS</span> <span class="brand-thin">ENGINE</span></h1>
             <button id="toggleBtn">
                 <span class="icon"></span>
                 <span class="btn-text"></span>
@@ -51,7 +57,7 @@
                     <div class="section-title">Appearance</div>
                     <div class="control-group">
                         <label>Wireframe Density (%)</label>
-                        <input type="range" id="wireDensity" min="10" max="100" step="10" value="50">
+                        <input type="range" id="wireDensity" min="10" max="100" step="10" value="100">
                     </div>
                     <div class="control-group color-row">
                         <label for="color">Wireframe Color</label>
@@ -80,7 +86,12 @@
                                 <input type="range" id="point-budget" class="point-slider" min="1000" max="100000"
                                     step="1000" value="20000">
                             </div>
-                            <button class="mode-btn view-btn" data-view="BEAUTY" title="Beauty Render">✧</button>
+                            <button class="mode-btn view-btn" data-view="UV" title="UV / Barycentric">
+                                <span class="material-symbols-outlined">texture</span>
+                            </button>
+                            <button class="mode-btn view-btn" data-view="NORMALS" title="Normals View">
+                                <span class="material-symbols-outlined">view_in_ar</span>
+                            </button>
                         </div>
 
                     </div>
@@ -285,43 +296,45 @@
 
     <!-- Fragmented Logic -->
     <!-- Core System -->
-    <script src="js/core/config.js?v=3"></script>
-    <script src="js/core/buffers.js?v=3"></script>
-    <script src="js/core/depthView.js?v=3"></script>
-    <script src="js/core/optimizer.js?v=3"></script>
-    <script src="js/core/rotationCache.js?v=3"></script>
-    <script src="js/core/math.js?v=3"></script>
-    <script src="js/core/camera.js?v=3"></script>
-    <script src="js/core/rasterizer.js?v=3"></script>
-    <script src="js/core/rasterizer-pixel.js?v=3"></script>
-    <script src="js/core/wasm/rasterizer_v2.js?v=3"></script>
-    <script src="js/core/rasterizer-wasm-wrapper.js?v=3"></script>
+    <script src="js/core/config.js?v=4"></script>
+    <script src="js/core/buffers.js?v=4"></script>
+    <script src="js/core/depthView.js?v=4"></script>
+    <script src="js/core/optimizer.js?v=4"></script>
+    <script src="js/core/rotationCache.js?v=4"></script>
+    <script src="js/core/math.js?v=4"></script>
+    <script src="js/core/camera.js?v=4"></script>
+    <script src="js/core/rasterizer.js?v=4"></script>
+    <script src="js/core/rasterizer/scanline.js?v=4"></script>
+    <script src="js/core/rasterizer/scene_renderer.js?v=4"></script>
+    <script src="js/core/rasterizer-pixel.js?v=4"></script>
+    <script src="js/core/wasm/rasterizer_v2.js?v=4"></script>
+    <script src="js/core/rasterizer-wasm-wrapper.js?v=4"></script>
 
-    <script src="js/core/renderer.js?v=3"></script>
-    <script src="js/data/data.js?v=3"></script>
-    <script src="js/core/parser.js?v=3"></script>
-    <script src="js/state/store.js?v=3"></script>
+    <script src="js/core/renderer.js?v=4"></script>
+    <script src="js/data/data.js?v=4"></script>
+    <script src="js/core/parser.js?v=4"></script>
+    <script src="js/state/store.js?v=4"></script>
 
     <!-- Engine Modules -->
-    <script src="js/ui/hud.js"></script>
-    <script src="js/ui/gizmo.js"></script>
-    <script src="js/ui/sidebar.js?v=3"></script>
-    <script src="js/ui/ui.js?v=3"></script>
-    <script src="js/ui/colorpicker.js?v=3"></script>
-    <script src="js/io/streaming.js?v=3"></script>
-    <script src="js/io/transfer.js?v=3"></script>
-    <script src="js/interaction/controls.js?v=3"></script>
-    <script src="js/core/gizmo/gizmo-utils.js?v=3"></script>
-    <script src="js/core/gizmo/gizmo-translate.js?v=3"></script>
-    <script src="js/core/gizmo/gizmo-rotate.js?v=3"></script>
-    <script src="js/core/gizmo/gizmo-scale.js?v=3"></script>
-    <script src="js/core/gizmo/gizmo-outlines.js?v=3"></script>
-    <script src="js/core/gizmoRenderer.js?v=3"></script>
-    <script src="js/core/gizmoHitTest.js?v=3"></script>
-    <script src="js/core/engine.js?v=3"></script>
+    <script src="js/ui/hud.js?v=4"></script>
+    <script src="js/ui/gizmo.js?v=4"></script>
+    <script src="js/ui/sidebar.js?v=4"></script>
+    <script src="js/ui/ui.js?v=4"></script>
+    <script src="js/ui/colorpicker.js?v=4"></script>
+    <script src="js/io/streaming.js?v=4"></script>
+    <script src="js/io/transfer.js?v=4"></script>
+    <script src="js/interaction/controls.js?v=4"></script>
+    <script src="js/core/gizmo/gizmo-utils.js?v=4"></script>
+    <script src="js/core/gizmo/gizmo-translate.js?v=4"></script>
+    <script src="js/core/gizmo/gizmo-rotate.js?v=4"></script>
+    <script src="js/core/gizmo/gizmo-scale.js?v=4"></script>
+    <script src="js/core/gizmo/gizmo-outlines.js?v=4"></script>
+    <script src="js/core/gizmoRenderer.js?v=4"></script>
+    <script src="js/core/gizmoHitTest.js?v=4"></script>
+    <script src="js/core/engine.js?v=4"></script>
 
     <!-- Entry Point -->
-    <script src="js/index.js?v=3"></script>
+    <script src="js/index.js?v=4"></script>
 </body>
 
 </html>

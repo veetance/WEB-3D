@@ -140,10 +140,19 @@
 }
 
 .panel-header h1 {
+    font-family: 'Inter', 'Outfit', sans-serif;
     font-size: 0.8rem;
     color: #00ffd2;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     white-space: nowrap;
+}
+
+.panel-header .brand-bold {
+    font-weight: 900;
+}
+
+.panel-header .brand-thin {
+    font-weight: 200;
 }
 
 /* Handle Collapsed State */

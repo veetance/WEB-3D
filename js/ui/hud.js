@@ -42,6 +42,17 @@ window.ENGINE.HUD = (function () {
             }
 
             viewport.classList.toggle('no-ui', !config.showHUD);
+
+            // Resonance Monitoring
+            const cpuHUD = document.getElementById('hud-cpu');
+            if (cpuHUD) {
+                const isIsolated = window.crossOriginIsolated;
+                const coreCount = window.ENGINE.RasterizerWASM.getWorkerCount ? window.ENGINE.RasterizerWASM.getWorkerCount() : 0;
+                const coreStatus = isIsolated ? (coreCount > 0 ? `CORE:${coreCount}` : 'WAITING') : 'SCALAR';
+                cpuHUD.textContent = coreStatus;
+                cpuHUD.style.color = isIsolated ? "#00ffd2" : "#ffbe3e";
+                cpuHUD.title = isIsolated ? "Full Multi-core Resonance Active" : "Isolation Limited. Running on Scalar Core.";
+            }
         });
     }
 

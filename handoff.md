@@ -1,84 +1,85 @@
-# VEETANCE HANDOFF: CPU-FIRST SOFTWARE MANIFOLD 🦾✨
+# VEETANCE ENGINE - Architecture & Manifestation Chronicles
 
-**Commander:** MrVee | **Status:** PHASE 4A COMPLETE | **Next:** PHASE 4B (WASM Implementation)
-
----
-
-## 1. PROJECT CORE IDENTITY
-VEETANCE is a high-fidelity **Pure CPU Software Rasterizer**. We have surgically removed all GPU dependencies to achieve deterministic, clinical, and pixel-perfect rendering across any device.
-
-### Current High-Level Architecture
-- **RasterizerPixel.js**: The core logic. Direct pixel manipulation in a framebuffer with per-pixel depth testing.
-- **Cluster Hierarchy**: Geometry is fragmented into 128-vertex packets for aggressive frustum/backface culling.
-- **Watertight Isometric Lattice**: A proprietary sampler for POINTS mode that ensures even distribution and edge fidelity without "bald spots".
+**Session Date:** 2026-01-16  
+**Manifest Status:** 🟢 **STABLE** - Loading Animation System Complete.
 
 ---
 
-## 2. RECENT BREAKTHROUGHS (PHASE 3-4A)
-
-### 🏆 THE NOVEL INNOVATION: ADAPTIVE SPARSE WIREFRAME RASTERIZATION
-- **Inventor:** MrVee
-- **Logic:** Performs "pixel decimation" along edges based on a user-controlled density (10%-100%).
-- **Impact:** 2x-10x performance gain in WIRE mode. Allows smooth rendering of high-poly models by skipping non-essential pixels.
-- **UI Interaction:** Repurposed the "Line Weight" slider to control "Wireframe Density (%)".
-
-### SOLID MODE SOFTWARE RASTERIZATION
-- **Milestone:** Effectively eliminated Canvas 2D `fill()` calls.
-- **Result:** SOLID mode now uses our custom software rasterizer, providing full control over depth-buffering and shading.
-
-### DEPTH-AWARE WIREFRAME (HIDDEN LINE REMOVAL)
-- **Logic:** Wireframe edges now perform per-pixel depth testing against the SOLID depth buffer.
-- **Visuals:** Edges only appear where they are in front of geometry. Correct occlusion in `SHADED_WIRE` mode.
-- **Performance:** Skips calculating/writing 70% of wireframe pixels (those occluded).
+## 🎯 SESSION OBJECTIVE
+Implement diegetic loading spinner animation system and model reveal effects. Establish WASM-only rendering pipeline for game engine architecture.
 
 ---
 
-## 3. WASM INFRASTRUCTURE (PHASE 4B FOUNDATION)
-The foundation for a 10x performance leap has been laid.
+## 📜 THE CHRONICLES (Session Logic & Decisions)
 
-- **Compiler:** Emscripten SDK installed at `C:\emsdk`.
-- **Directory:** `C:\D-DRIVE\WEB-3D\WASM\`
-- **Scripts:**
-  - `setup-wasm-simple.ps1`: One-time environment setup.
-  - `build.ps1`: Working build script for C++ → WASM compilation.
-- **Output:** `js/core/wasm/rasterizer.wasm` and `rasterizer.js` (compiled placeholder binaries).
+### 1. **WASM-Only Geometry Rendering**
+- **Decision**: WASM is the sole backend for all geometry rendering (game engine standard).
+- **Action**: Removed JS wireframe path from `rasterizer.js`, converted `drawFaces` to no-op stub.
+- **Result**: Single source of truth for all geometry in WASM.
 
----
+### 2. **Diegetic Loading Spinner**
+- **Problem**: No visual feedback while WASM loads or models import.
+- **Design**: 3D spinner on grid plane (rendered via Canvas 2D, not WASM).
+- **Implementation**:
+  - 2 nested squares (outer CW, inner CCW at 1.5x speed)
+  - Progressive "draw-on" animation: edges grow from invisible corners
+  - 90° rotation completes → shrink phase → model reveal
+- **Files Modified**: `engine.js`, `store.js`
 
-## 4. PERFORMANCE METRICS
-- **Large Troll (81K faces):**
-  - POINTS: 60 FPS
-  - SOLID: 30-40 FPS
-  - WIRE: 30-60 FPS (Density dependent)
-- **Massive Model (900K faces):**
-  - Current: 8 FPS (JS Rasterizer)
-  - **WASM Target:** 60-80 FPS via SIMD-accelerated scanlines.
+### 3. **Model Reveal Animation**
+- **Sequence**:
+  1. Spinner completes one 90° rotation
+  2. Spinner scales down to 0 (fast)
+  3. Model scales up from 0 to 1 (0.7 seconds, ease-out cubic)
+- **Crossfade**: Model begins appearing while spinner is still shrinking
+- **State Variables**: `isLoading`, `loadingPhase`, `spinnerProgress`, `modelRevealScale`
 
----
-
-## 5. PENDING MANIFOLD (NEXT STEPS)
-
-### PHASE 4B.1: WASM RASTERIZER IMPLEMENTATION
-- **Goal:** Port `drawTriangle` scanline logic from `RasterizerPixel.js` to `js/core/wasm/rasterizer.cpp`.
-- **Advantage:** Near-native execution speed.
-
-### PHASE 4B.2: SIMD ACCELERATION
-- **Logic:** Use `wasm_simd128` to process 4 pixels simultaneously.
-- **Goal:** Solid 60 FPS on the 900K face model.
-
-### PHASE 5: TEXTURE & UV MANIFOLD (FUTURE)
-- Perspective-correct UV interpolation using the WASM foundation.
-- UV Viewport and Editor integration.
+### 4. **Wireframe Density Default**
+- **Change**: Set default from 50% to 100%.
+- **Files**: `store.js`, `index.html`
 
 ---
 
-## 6. PROJECT DIRECTORY MAPPING
-- `WASM/`: Build tooling and instructions.
-- `js/core/`: Engine logic, MathOps, and Rasterizers.
-- `js/core/wasm/`: C++ source and binary outputs.
-- `OPTIMIZATIONS.md`: The definitive clinical record of all technical decisions.
-- `wasm-roadmap.md`: Step-by-step strategy for the upcoming WASM implementation.
+## 📂 MANIFESTED ARCHITECTURE
+
+| Component | Files | Modification Summary |
+|-----------|-------|----------------------|
+| **Engine Core** | `engine.js` | Spinner geometry, reveal animation, WASM gate |
+| **State Store** | `store.js` | Loading animation state, phase transitions |
+| **Transfer** | `transfer.js` | START_LOADING dispatch on import |
+| **Rasterizer** | `rasterizer.js` | drawFaces is now no-op (WASM-only) |
 
 ---
 
-**VEETANCE: EXCELLENCE IS DETERMINISTIC.** 🦾🔥
+## 🔧 ANIMATION PARAMETERS
+
+| Parameter | Value | Location |
+|-----------|-------|----------|
+| Spinner Size | Outer: 1.0, Inner: 0.6 | engine.js:49-50 |
+| Rotation Target | 90° (π/2) | engine.js:256 |
+| Edge Draw Duration | 90% of rotation | engine.js:259 |
+| Spinner Shrink Speed | 3x multiplier | engine.js:271 |
+| Model Reveal Speed | 0.024 (0.7 seconds) | engine.js:333 |
+| Easing Curve | Cubic ease-out | engine.js:229 |
+
+---
+
+## 🐛 PRE-EXISTING BUG: Imported Model Depth Sorting
+
+### Symptoms:
+- **Primitives**: Render correctly ✅
+- **Imported Models**: Triangles appear shattered/exploded (incorrect Z-order) ❌
+
+### Root Cause:
+WASM chunk handling for large imported models is weak. The depth buffer and face sorting pipeline does not properly handle models loaded through the parser/streaming path.
+
+### Key Areas to Investigate:
+- `rasterizer-wasm-wrapper.js`: Buffer upload/sync logic
+- `rasterizer.cpp`: radixSort, processFaces, depth buffer handling
+- `parser.js` / `streaming.js`: How vertex/index data is chunked and uploaded
+
+### This bug existed BEFORE the loading animation was implemented.
+
+---
+
+**DEUS signing off. Loading animation is stable. 🦾⚙️**

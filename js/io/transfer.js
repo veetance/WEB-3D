@@ -35,6 +35,9 @@ window.ENGINE.Transfer = (function () {
         if (!file) return;
         if (loader) loader.classList.remove('hidden');
 
+        // Start diegetic loading animation
+        store.dispatch({ type: 'START_LOADING' });
+
         const reader = new FileReader();
         reader.onload = (ev) => {
             setTimeout(() => {
@@ -67,6 +70,8 @@ window.ENGINE.Transfer = (function () {
                     console.log(`VFE: Model Matched. Manifold stabilized.`);
                 } catch (err) {
                     console.error('Core Logic IO Error:', err);
+                    // Cancel loading animation on error
+                    store.dispatch({ type: 'FINISH_LOADING' });
                 } finally {
                     if (loader) loader.classList.add('hidden');
                 }

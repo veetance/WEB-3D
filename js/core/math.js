@@ -337,5 +337,29 @@ window.ENGINE.MathOps = {
             sz += vertices[i + 2];
         }
         return { x: sx / count, y: sy / count, z: sz / count };
+    },
+
+    /**
+     * Test AABB visibility against a matrix (Frustum Culling)
+     */
+    isBoxVisible: (aabb, m) => {
+        const xmin = aabb[0], ymin = aabb[1], zmin = aabb[2];
+        const xmax = aabb[3], ymax = aabb[4], zmax = aabb[5];
+        const corners = [
+            [xmin, ymin, zmin], [xmax, ymin, zmin], [xmin, ymax, zmin], [xmax, ymax, zmin],
+            [xmin, ymin, zmax], [xmax, ymin, zmax], [xmin, ymax, zmax], [xmax, ymax, zmax]
+        ];
+        let pL = 0, pR = 0, pB = 0, pT = 0, pN = 0, pF = 0;
+        for (let i = 0; i < 8; i++) {
+            const c = corners[i], x = c[0], y = c[1], z = c[2];
+            const w = m[3] * x + m[7] * y + m[11] * z + m[15];
+            const xw = m[0] * x + m[4] * y + m[8] * z + m[12];
+            const yw = m[1] * x + m[5] * y + m[9] * z + m[13];
+            const zw = m[2] * x + m[6] * y + m[10] * z + m[14];
+            if (xw < -w) pL++; if (xw > w) pR++;
+            if (yw < -w) pB++; if (yw > w) pT++;
+            if (zw < -w) pN++; if (zw > w) pF++;
+        }
+        return !(pL === 8 || pR === 8 || pB === 8 || pT === 8 || pN === 8 || pF === 8);
     }
 };

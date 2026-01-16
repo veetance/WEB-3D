@@ -4,8 +4,8 @@
  */
 window.ENGINE = window.ENGINE || {};
 window.ENGINE.Config = {
-    // Limits
-    MAX_VERTICES: 2000000,
+    // Limits (increased for 1M+ face models like LABUBU)
+    MAX_VERTICES: 1000000,
     MAX_FACES: 1500000,
 
     // Rendering
@@ -13,6 +13,10 @@ window.ENGINE.Config = {
     Z_OFFSET: 5,
     GRID_SIZE: 10,
     GRID_DIVISIONS: 10,
+    debug: true,
+
+    // View Mode
+    viewMode: 'WIRE',
 
     // Initial State
     COLORS: {

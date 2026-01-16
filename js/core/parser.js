@@ -47,16 +47,10 @@ window.ENGINE.Parser = (function () {
 
         const centroid = { x: sx / vCount, y: sy / vCount, z: (sz / vCount) - pZ };
 
-        // EXTREME OPTIMIZATION: Move vertices to WASM heap immediately
-        const WASM = window.ENGINE.RasterizerWASM;
-        let wasmPtr = null;
-        if (WASM && WASM.isReady()) {
-            wasmPtr = WASM.malloc(vertices.byteLength);
-            const heapView = new Float32Array(window.Module.HEAPU8.buffer, wasmPtr, vertices.length);
-            heapView.set(vertices);
-        }
+        // NOTE: wasmPtr removed - processVertices already copies to g_rawVertices static buffer
+        // The old wasmPtr allocation was leaking memory on every model load!
 
-        return { vertices, indices, centroid, wasmPtr };
+        return { vertices, indices, centroid };
     }
 
     return {

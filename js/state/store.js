@@ -44,7 +44,7 @@ window.ENGINE = window.ENGINE || {};
             showGrid: true,
             showDiagonals: false, // Default: Clean Wireframe
             showHUD: true,
-            wireDensity: 0.5, // Sparse Wireframe: 50% pixel density (every other pixel)
+            wireDensity: 1.0, // Full wireframe density (100%)
             viewMode: 'SHADED_WIRE',
             fov: 45,
             pointBudget: 20000
@@ -60,7 +60,12 @@ window.ENGINE = window.ENGINE || {};
             hoveredFrontArrow: false, // For "Front Direction" hover text
             info: { verts: 0, faces: 0 },
             centroid: { x: 0, y: 0, z: 0 },
-            stats: { fps: 0, mem: 0 }
+            stats: { fps: 0, mem: 0 },
+            // Loading Animation State
+            isLoading: true,  // True until WASM is ready
+            loadingPhase: 0,  // 0 = spinning, 1 = shrinking, 2 = done
+            spinnerProgress: 0, // 0 to 2π (one revolution)
+            modelRevealScale: 0 // 0 to 1 (model scale animation) - starts at 0
         }
     };
 
@@ -202,6 +207,41 @@ window.ENGINE = window.ENGINE || {};
 
             case 'SET_SELECTED_OBJECT':
                 return { ...state, ui: { ...state.ui, selectedObjectId: action.payload } };
+
+            case 'SET_LOADING':
+                return { ...state, ui: { ...state.ui, isLoading: action.payload } };
+
+            case 'SET_LOADING_PHASE':
+                return { ...state, ui: { ...state.ui, loadingPhase: action.payload } };
+
+            case 'UPDATE_SPINNER':
+                return { ...state, ui: { ...state.ui, spinnerProgress: action.payload } };
+
+            case 'SET_MODEL_REVEAL_SCALE':
+                return { ...state, ui: { ...state.ui, modelRevealScale: action.payload } };
+
+            case 'START_LOADING':
+                return {
+                    ...state,
+                    ui: {
+                        ...state.ui,
+                        isLoading: true,
+                        loadingPhase: 0,
+                        spinnerProgress: 0,
+                        modelRevealScale: 0
+                    }
+                };
+
+            case 'FINISH_LOADING':
+                return {
+                    ...state,
+                    ui: {
+                        ...state.ui,
+                        isLoading: false,
+                        loadingPhase: 2
+                        // Don't set modelRevealScale - let animation continue
+                    }
+                };
 
             default:
                 return state;
